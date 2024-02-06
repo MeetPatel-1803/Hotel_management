@@ -23,36 +23,6 @@ app.use((_req, res, next) => {
   next();
 });
 
-const userVehicleModel = require("./models/userVehicleModel");
-const userProfileModel = require("./models/userProfileModel");
-const User = require("./models/userModel");
-
-User.sync()
-  .then(() => {                                 // APPLY MULTIPLE SYNCHRONIZATION USING "sequelize" INSTANCE
-    console.log("User table created successfully !");
-  })
-  .catch((error) => {
-    console.log("unable to create table :", error);
-  });
-
-userProfileModel
-  .sync()
-  .then(() => {
-    console.log("userProfileModel table created successfully !");
-  })
-  .catch((error) => {
-    console.log("unable to create table :", error);
-  });
-
-userVehicleModel
-  .sync()
-  .then(() => {
-    console.log("userVehicleModel table created successfully !");
-  })
-  .catch((error) => {
-    console.log("unable to create table :", error);
-  });
-
 app.listen(process.env.PORT, () => {
   console.log(`server is listening on port : ${process.env.PORT}`);
 });
