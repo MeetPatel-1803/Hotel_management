@@ -1,14 +1,14 @@
-const profileValidation = require("../middleware/userProfileValidation");
-const User = require("../models/userModel");
+const profileValidation = require("../validations/userProfileValidation");
+const User = require("../models/user");
 const Sequelize = require("sequelize");
-const userProfileModel = require("../models/userProfileModel");
+const userProfileModel = require("../models/userProfile");
 
 exports.userProfile = async (req, res) => {
   const reqParams = req.body;
 
   profileValidation(reqParams, res, async (validate) => {
     if (validate) {
-      console.log(">>>>>>>>>>>>>>>>>");
+  
       const user = await userProfileModel.create({
         first_name: reqParams.first_name,
         last_name: reqParams.last_name,
@@ -22,7 +22,7 @@ exports.userProfile = async (req, res) => {
         }),
       });
 
-      console.log(user, "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
+     
 
       return res.status(200).json({
         user,
@@ -30,11 +30,3 @@ exports.userProfile = async (req, res) => {
     }
   });
 };
-// exports.getUserProfile = async (req, res) => {
-//   const userProfileInfo = req.body;
-//   console.log(userProfileInfo);
-// };
-
-// exports.getUserProfilePicture = async (req, res) => {
-//   const userProfilePicture = req.body;
-// };

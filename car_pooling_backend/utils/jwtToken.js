@@ -1,5 +1,12 @@
 const jwt = require("jsonwebtoken");
-// const JWT_SECRETKEY = "GGBEJKGBERJIGGWJKUI5789Y589ERSGFHTG";
+const { LOGIN_SUCCESSFUL } = require("../message");
+const { successResponseDatasecond } = require("./response");
+
+/**
+ * This function will generate a JWT Token.
+ * @param {*} id 
+ * @param {*} res 
+ */
 
 const jwtTokens = (id, res) => {
   const token = jwt.sign({ id: id }, process.env.JWT_SECRETKEY, {
@@ -13,13 +20,7 @@ const jwtTokens = (id, res) => {
     httpOnly: true,
   };
 
-  res.status(200, token, options).json({
-    id,
-    meta: {
-      message: " LogIn Successfully",
-      token,
-    },
-  });
+  successResponseDatasecond(res, id, token, LOGIN_SUCCESSFUL);
 };
 
 module.exports = jwtTokens;
