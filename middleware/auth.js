@@ -1,8 +1,11 @@
 const jwt = require("jsonwebtoken");
-const { INCORRECT_TOKEN, TOKEN_NOT_GET } = require("../message");
+const { INCORRECT_TOKEN, TOKEN_NOT_GET, UNAUTHORIZED } = require("../message");
 const { errorResponseData } = require("../utils/response");
 
 exports.isAuthenticatedUser = (req, res, next) => {
+  if (!req.headers.authorization) {
+    return errorResponseData(res, UNAUTHORIZED, 401);
+  }
   const authToken = req.headers.authorization.split(" ");
   const token = authToken[1];
 
@@ -16,7 +19,6 @@ exports.isAuthenticatedUser = (req, res, next) => {
     return errorResponseData(res, INCORRECT_TOKEN, 498);
   } else {
     req.id = decodedToken.id;
-    req.token = token;
   }
 
   next();

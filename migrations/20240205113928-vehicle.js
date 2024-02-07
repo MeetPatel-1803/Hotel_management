@@ -3,7 +3,7 @@ const { DataTypes } = require("sequelize");
 const User = require("../models/user");
 
 /**
- *  It will create table according to specified attributes. 
+ *  It will create table according to specified attributes.
  */
 
 module.exports = {

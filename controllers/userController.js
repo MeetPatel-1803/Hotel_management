@@ -78,15 +78,15 @@ const logInUser = async (req, res) => {
         },
       });
 
-      const profile = await Profile.findOne({
-        where: {
-          user_id: user.id,
-        },
-      });
-
       if (!user) {
         return errorResponseData(res, UNAUTHORIZED_USER, 401);
       } else {
+        const profile = await Profile.findOne({
+          where: {
+            user_id: user.id,
+          },
+        });
+
         bcrypt.compare(reqParams.password, user.password, (err, isValid) => {
           if (err) {
             return errorResponseWithoutData(res, err);
@@ -201,7 +201,7 @@ const resetPassword = async (req, res) => {
         },
       });
 
-      if (user.token_expire < d) {
+      if (user && user.token_expire < d) {
         return errorResponseWithoutData(res, TOKEN_EXPIRED, 401);
       } else {
         if (user) {

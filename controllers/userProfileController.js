@@ -1,15 +1,25 @@
 const profileValidation = require("../validations/userProfileValidation");
-const User = require("../models/user");
+
 const Profile = require("../models/userProfile");
-const Sequelize = require("sequelize");
-const { PROFILE_FORM_SUBMITTED, SOMETHING_WRONG } = require("../message");
+
+const {
+  PROFILE_FORM_SUBMITTED,
+  SOMETHING_WRONG,
+  USER_PROFILE_FETCHED,
+} = require("../message");
 const {
   responseSuccessWithMessage,
   errorResponseWithoutData,
 } = require("../utils/response");
 
 const userProfile = async (req, res) => {
-  const profile = Profile.findOne();
+  const profile = await Profile.findOne({
+    where: {
+      user_id: req.id,
+    },
+  });
+
+  responseSuccessWithMessage(res, profile, USER_PROFILE_FETCHED, (code = 1));
 };
 
 const userProfileForm = async (req, res) => {

@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const User = require("./user");
-const userVehicleModel = require("./userVehicle");
+const Vehicle = require("./userVehicle");
 
 const Profile = sequelize.define("profiles", {
   id: {
@@ -14,13 +14,6 @@ const Profile = sequelize.define("profiles", {
     type: DataTypes.INTEGER,
     references: {
       model: User,
-      key: "id",
-    },
-  },
-  vehicle_id: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: userVehicleModel,
       key: "id",
     },
   },
@@ -50,7 +43,6 @@ const Profile = sequelize.define("profiles", {
     allowNull: true,
   },
 });
-
 
 module.exports = Profile;
 
