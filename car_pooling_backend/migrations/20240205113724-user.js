@@ -1,15 +1,9 @@
 "use strict";
 const { DataTypes } = require("sequelize");
 
-/** @type {import('sequelize-cli').Migration} */
+
 module.exports = {
   async up(queryInterface, Sequelize) {
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
 
     return queryInterface.createTable("Users", {
       id: {
@@ -45,7 +39,7 @@ module.exports = {
         defaultValue: null,
       },
       token_expire: {
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: true,
       },
     });
