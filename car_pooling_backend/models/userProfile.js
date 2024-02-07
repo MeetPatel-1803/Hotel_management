@@ -3,7 +3,7 @@ const sequelize = require("../config/database");
 const User = require("./user");
 const userVehicleModel = require("./userVehicle");
 
-const userProfileModel = sequelize.define("profiles", {
+const Profile = sequelize.define("profiles", {
   id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -26,7 +26,7 @@ const userProfileModel = sequelize.define("profiles", {
   },
   first_name: {
     type: DataTypes.STRING(50),
-    allowNull: true,
+    allowNull: false,
   },
   last_name: {
     type: DataTypes.STRING(50),
@@ -46,13 +46,13 @@ const userProfileModel = sequelize.define("profiles", {
     values: ["Male", "Female"],
   },
   date_of_birth: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: true,
   },
 });
 
 
-module.exports = userProfileModel;
+module.exports = Profile;
 
 // profile_picture: {
 //   type: DataTypes.BLOB("long"),

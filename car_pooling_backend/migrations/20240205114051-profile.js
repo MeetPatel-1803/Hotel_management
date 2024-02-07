@@ -1,6 +1,5 @@
 "use strict";
 const { DataTypes } = require("sequelize");
-const userVehicleModel = require("../models/userVehicle");
 
 /**
  * It will create table according to specified attributes.
@@ -30,7 +29,7 @@ module.exports = {
       },
       first_name: {
         type: DataTypes.STRING(50),
-        allowNull: true,
+        allowNull: false,
       },
       last_name: {
         type: DataTypes.STRING(50),
@@ -50,7 +49,7 @@ module.exports = {
         values: ["Male", "Female"],
       },
       date_of_birth: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: true,
       },
     });
