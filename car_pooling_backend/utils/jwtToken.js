@@ -1,11 +1,10 @@
 const jwt = require("jsonwebtoken");
-const { LOGIN_SUCCESSFUL } = require("../message");
-const { successResponseDatasecond } = require("./response");
+const Profile = require("../models/userProfile");
 
 /**
  * This function will generate a JWT Token.
- * @param {*} id 
- * @param {*} res 
+ * @param {*} id
+ * @param {*} res
  */
 
 const jwtTokens = (id, res) => {
@@ -20,7 +19,15 @@ const jwtTokens = (id, res) => {
     httpOnly: true,
   };
 
-  successResponseDatasecond(res, id, token, LOGIN_SUCCESSFUL);
+  const profileData = async () => {
+    const profile = await Profile.findOne({
+      where: {
+        user_id: user.id,
+      },
+    });
+    console.log(profile);
+  };
+  return { token, options, profileData };
 };
 
 module.exports = jwtTokens;

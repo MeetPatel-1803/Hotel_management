@@ -11,6 +11,7 @@ const {
   errorResponseData,
   errorResponseWithoutData,
   successResponseWithoutData,
+  successResponseDatasecond,
 } = require("../utils/response");
 const {
   USER_REGISTERED,
@@ -20,7 +21,10 @@ const {
   INCORRECT_MAIL,
   INCORRECT_TOKEN,
   PASSWORD_UPDATED,
+  TOKEN_EXPIRED,
+  LOGIN_SUCCESSFUL,
 } = require("../message");
+const Profile = require("../models/userProfile");
 
 /**
  * @description It will register a user and validate its credentials.
@@ -73,6 +77,13 @@ const logInUser = async (req, res) => {
           email: reqParams.email,
         },
       });
+
+      const profile = await Profile.findOne({
+        where: {
+          user_id: user.id,
+        },
+      });
+
       if (!user) {
         return errorResponseData(res, UNAUTHORIZED_USER, 401);
       } else {
@@ -82,7 +93,23 @@ const logInUser = async (req, res) => {
           } else if (!isValid) {
             return errorResponseData(res, INCORRECT_PASSWORD, 400);
           } else {
-            jwtTokens(user.id, res);
+            const tokenData = jwtTokens(user.id, res);
+
+            if (profile) {
+              successResponseDatasecond(
+                res,
+                true,
+                tokenData.token,
+                LOGIN_SUCCESSFUL
+              );
+            } else {
+              successResponseDatasecond(
+                res,
+                false,
+                tokenData.token,
+                LOGIN_SUCCESSFUL
+              );
+            }
           }
         });
       }
@@ -107,9 +134,19 @@ const forgotPassword = async (req, res) => {
 
   if (user) {
     const token = randomTokens(2);
+    const d = new Date();
+    const tokenExpire = new Date(
+      d.getFullYear(),
+      d.getMonth(),
+      d.getDate(),
+      d.getHours(),
+      d.getMinutes() + 1,
+      d.getSeconds(),
+      d.getMilliseconds()
+    );
 
     const setToken = await User.update(
-      { Token: token },
+      { Token: token, token_expire: tokenExpire },
       { where: { email: reqParams.email } }
     );
 
@@ -154,6 +191,7 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   const reqParams = req.body;
   const token = reqParams.token;
+  const d = new Date();
 
   passwordValidation(reqParams, res, async (validate) => {
     if (validate) {
@@ -162,24 +200,29 @@ const resetPassword = async (req, res) => {
           Token: token,
         },
       });
-      if (user) {
-        bcrypt.hash(reqParams.password, 10, async (err, hash) => {
-          if (err) {
-            return errorResponseWithoutData(res, err);
-          } else {
-            const setData = await User.update(
-              { password: hash, Token: null },
-              { where: { Token: token } }
-            );
-            if (!setData) {
-              errorResponseData(res, INCORRECT_TOKEN, 498);
-            } else {
-              successResponseWithoutData(res, PASSWORD_UPDATED);
-            }
-          }
-        });
+
+      if (user.token_expire < d) {
+        return errorResponseWithoutData(res, TOKEN_EXPIRED, 401);
       } else {
-        errorResponseData(res, INCORRECT_TOKEN, 498);
+        if (user) {
+          bcrypt.hash(reqParams.password, 10, async (err, hash) => {
+            if (err) {
+              return errorResponseWithoutData(res, err);
+            } else {
+              const setData = await User.update(
+                { password: hash, Token: null, token_expire: null },
+                { where: { Token: token } }
+              );
+              if (!setData) {
+                errorResponseData(res, INCORRECT_TOKEN, 498);
+              } else {
+                successResponseWithoutData(res, PASSWORD_UPDATED);
+              }
+            }
+          });
+        } else {
+          errorResponseData(res, INCORRECT_TOKEN, 498);
+        }
       }
     }
   });

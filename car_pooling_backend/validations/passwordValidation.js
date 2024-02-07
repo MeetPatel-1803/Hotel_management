@@ -24,7 +24,7 @@ const passwordValidation = (req, res, callback) => {
 
   const { error } = schema.validate(req);
   if (error) {
-    errorResponseData(res, error.message, 401);
+    errorResponseData(res, error.message);
   } else {
     return callback(true);
   }

@@ -1,32 +1,37 @@
 const profileValidation = require("../validations/userProfileValidation");
 const User = require("../models/user");
+const Profile = require("../models/userProfile");
 const Sequelize = require("sequelize");
-const userProfileModel = require("../models/userProfile");
+const { PROFILE_FORM_SUBMITTED, SOMETHING_WRONG } = require("../message");
+const {
+  responseSuccessWithMessage,
+  errorResponseWithoutData,
+} = require("../utils/response");
 
-exports.userProfile = async (req, res) => {
+const userProfile = async (req, res) => {
+  const profile = Profile.findOne();
+};
+
+const userProfileForm = async (req, res) => {
   const reqParams = req.body;
 
   profileValidation(reqParams, res, async (validate) => {
     if (validate) {
-  
-      const user = await userProfileModel.create({
+      const setData = await Profile.create({
+        user_id: req.id,
         first_name: reqParams.first_name,
         last_name: reqParams.last_name,
-        bio: reqParams.bio,
-        address: reqParams.address,
-        gender: reqParams.gender,
         date_of_birth: reqParams.date_of_birth,
-        user_id: userProfileModel.findOne({
-          include: [{ model: User, attributes: ["id"] }],
-          // include: User,userProfileModel
-        }),
+        gender: reqParams.gender,
       });
 
-     
-
-      return res.status(200).json({
-        user,
-      });
+      if (!setData) {
+        return errorResponseWithoutData(res, SOMETHING_WRONG);
+      } else {
+        responseSuccessWithMessage(res, setData, PROFILE_FORM_SUBMITTED);
+      }
     }
   });
 };
+
+module.exports = { userProfileForm, userProfile };
