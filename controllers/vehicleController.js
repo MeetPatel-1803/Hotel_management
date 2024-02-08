@@ -1,7 +1,10 @@
 const numberPlateValidation = require("../validations/numberPlateValidation");
 const Vehicle = require("../models/userVehicle");
 const { VEHICLE_ADDED } = require("../message");
-const { responseSuccessWithMessage } = require("../utils/response");
+const {
+  responseSuccessWithMessage,
+  errorResponseData,
+} = require("../utils/response");
 const sequelize = require("../config/database");
 const Profile = require("../models/userProfile");
 
@@ -25,15 +28,12 @@ const addVehicle = async (req, res) => {
           { where: { user_id: req.id } }
         );
 
-        console.log(vehicle, "vehicle >>>");
-        console.log(id, "id >>>");
         await transaction.commit();
 
         responseSuccessWithMessage(res, vehicle, VEHICLE_ADDED);
       } catch (error) {
-        console.log(error);
         await transaction.rollback();
-        return res.end(JSON.stringify({ error: error.errors[0].message }));
+        return errorResponseData(res, error.errors[0].message, 400);
       }
     }
   });

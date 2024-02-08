@@ -1,7 +1,7 @@
 const profileValidation = require("../validations/userProfileValidation");
 const Profile = require("../models/userProfile");
 
-const randomDigits = require("../utils/rendomDigit");
+const { randomDigits } = require("../utils/helper");
 
 const {
   PROFILE_FORM_SUBMITTED,
@@ -13,8 +13,13 @@ const {
   responseSuccessWithMessage,
   errorResponseWithoutData,
 } = require("../utils/response");
-const generatePreSignedUrl = require("./s3Bucket");
+const generatePreSignedUrl = require("../utils/s3Bucket");
 
+/**
+ * @description This function will get the information and update about user profile.
+ * @param {*} req
+ * @param {*} res
+ */
 const userProfile = async (req, res) => {
   const profile = await Profile.findOne({
     where: {
@@ -24,6 +29,12 @@ const userProfile = async (req, res) => {
 
   responseSuccessWithMessage(res, profile, USER_PROFILE_FETCHED, (code = 1));
 };
+
+/**
+ * @description This function will get information from user.
+ * @param {*} req
+ * @param {*} res
+ */
 
 const userProfileForm = async (req, res) => {
   const reqParams = req.body;
@@ -46,6 +57,12 @@ const userProfileForm = async (req, res) => {
     }
   });
 };
+
+/**
+ * @description This function will uplaod a profile picture of user to s3 bucket using presigned url.
+ * @param {*} req
+ * @param {*} res
+ */
 
 const userProfilePicture = async (req, res) => {
   const imageFile = req.headers.mimetype;

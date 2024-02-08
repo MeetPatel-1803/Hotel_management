@@ -1,8 +1,9 @@
 const jwt = require("jsonwebtoken");
 const { INCORRECT_TOKEN, TOKEN_NOT_GET, UNAUTHORIZED } = require("../message");
 const { errorResponseData } = require("../utils/response");
+const { jwtVerify } = require("../utils/generateToken");
 
-exports.isAuthenticatedUser = (req, res, next) => {
+const isAuthenticatedUser = (req, res, next) => {
   if (!req.headers.authorization) {
     return errorResponseData(res, UNAUTHORIZED, 401);
   }
@@ -13,7 +14,7 @@ exports.isAuthenticatedUser = (req, res, next) => {
     return errorResponseData(res, TOKEN_NOT_GET, 401);
   }
 
-  const decodedToken = jwt.verify(token, process.env.JWT_SECRETKEY);
+  const decodedToken = jwtVerify(token);
 
   if (!decodedToken) {
     return errorResponseData(res, INCORRECT_TOKEN, 498);
@@ -23,3 +24,5 @@ exports.isAuthenticatedUser = (req, res, next) => {
 
   next();
 };
+
+module.exports = { isAuthenticatedUser };
