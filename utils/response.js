@@ -18,6 +18,14 @@ module.exports = {
       },
     };
 
+    if (extras) {
+      Object.keys(extras).forEach((key) => {
+        if ({}.hasOwnProperty.call(extras, key)) {
+          response.meta[key] = extras[key];
+        }
+      });
+    }
+
     return res.send(response);
   },
 

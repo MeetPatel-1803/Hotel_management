@@ -11,6 +11,9 @@ const responseMessages = {
   PROFILE_FORM_SUBMITTED: "Profile created",
   SOMETHING_WRONG: "Something went wrong !",
   TOKEN_NOT_GET: "Please Login to access this resource",
+  UNAUTHORIZED: "Unauthorized",
+  VEHICLE_ADDED: "Vehicel added successfully",
+  USER_PROFILE_FETCHED: "User profile fetched successfully",
 };
 
 module.exports = responseMessages;
