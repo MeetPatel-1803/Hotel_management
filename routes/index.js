@@ -11,7 +11,7 @@ const {
   userProfilePicture,
 } = require("../controllers/userProfileController");
 const { isAuthenticatedUser } = require("../middleware/auth");
-const addVehicle = require("../controllers/vehicleController");
+const {addVehicle, userVehiclePicture} = require("../controllers/vehicleController");
 const router = express.Router();
 
 router.post("/registration", registerUser);
@@ -24,5 +24,6 @@ router.get("/profile", isAuthenticatedUser, userProfile);
 router.post("/profile-picture", userProfilePicture);
 
 router.post("/vehicle-informaton", isAuthenticatedUser, addVehicle);
+router.post("/vehicle-picture", isAuthenticatedUser, userVehiclePicture);
 
 module.exports = router;

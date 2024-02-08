@@ -7,7 +7,7 @@ const {
   PROFILE_FORM_SUBMITTED,
   SOMETHING_WRONG,
   USER_PROFILE_FETCHED,
-} = require("../message");
+} = require("../utils/message");
 
 const {
   responseSuccessWithMessage,
@@ -68,12 +68,12 @@ const userProfilePicture = async (req, res) => {
   const imageFile = req.headers.mimetype;
   const imgExtension = imageFile.split("/")[1];
   const fileName = `${Date.now()}${randomDigits(4)}.${imgExtension}`;
-  const key = `${process.env.FILE_PATH}/${fileName}`;
+  const key = `${process.env.FILE_PATH_PROFILE}/${fileName}`;
   const expiresIn = 600;
 
   const url = generatePreSignedUrl(process.env.AWS_BUCKET_NAME, key, expiresIn);
 
-  res.end(JSON.stringify({ message: imageFile, exe: imgExtension, url: url }));
+  responseSuccessWithMessage(res, { Profile_image: url }, IMAGE_UPLOADED);
 };
 
 module.exports = { userProfileForm, userProfile, userProfilePicture };

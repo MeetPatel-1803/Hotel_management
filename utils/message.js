@@ -14,6 +14,7 @@ const responseMessages = {
   UNAUTHORIZED: "Unauthorized",
   VEHICLE_ADDED: "Vehicel added successfully",
   USER_PROFILE_FETCHED: "User profile fetched successfully",
+  IMAGE_UPLOADED: "Image Uploaded successfully",
 };
 
 module.exports = responseMessages;

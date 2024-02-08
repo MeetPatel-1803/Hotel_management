@@ -1,13 +1,20 @@
 const numberPlateValidation = require("../validations/numberPlateValidation");
 const Vehicle = require("../models/userVehicle");
-const { VEHICLE_ADDED } = require("../message");
+const { VEHICLE_ADDED, IMAGE_UPLOADED } = require("../utils/message");
 const {
   responseSuccessWithMessage,
   errorResponseData,
 } = require("../utils/response");
 const sequelize = require("../config/database");
 const Profile = require("../models/userProfile");
+const { randomDigits } = require("../utils/helper");
+const generatePreSignedUrl = require("../utils/s3Bucket");
 
+/**
+ * @description This function will store information about user vehicle.
+ * @param {*} req
+ * @param {*} res
+ */
 const addVehicle = async (req, res) => {
   const reqParams = req.body;
 
@@ -39,4 +46,21 @@ const addVehicle = async (req, res) => {
   });
 };
 
-module.exports = addVehicle;
+/**
+ * @description This function will upload image of user vehicle on s3 bucket.
+ * @param {*} req
+ * @param {*} res
+ */
+const userVehiclePicture = async (req, res) => {
+  const imageFile = req.headers.mimetype;
+  const imgExtension = imageFile.split("/")[1];
+  const fileName = `${Date.now()}${randomDigits(4)}.${imgExtension}`;
+  const key = `${process.env.FILE_PATH_VEHICLE}/${fileName}`;
+  const expiresIn = 600;
+
+  const url = generatePreSignedUrl(process.env.AWS_BUCKET_NAME, key, expiresIn);
+
+  responseSuccessWithMessage(res, { Image_url: url }, IMAGE_UPLOADED);
+};
+
+module.exports = { addVehicle, userVehiclePicture };
