@@ -7,7 +7,7 @@ module.exports = {
    * @param {*} id
    * @param {*} res
    */
-  jwtTokens(id, res) {
+  generateJWTToken(id, res) {
     const token = jwt.sign({ id: id }, process.env.JWT_SECRETKEY, {
       expiresIn: process.env.JWT_EXPIRE,
     });
@@ -27,7 +27,7 @@ module.exports = {
    * @param {*} token 
    * @returns 
    */
-  jwtVerify(token) {
+  verifyToken(token) {
     return jwt.verify(token, process.env.JWT_SECRETKEY);
   }
 };

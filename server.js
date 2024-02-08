@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
-const user = require("./routes/routes");
+const routes = require("./routes/index");
 const limiter = require("./middleware/rateLimiter");
 const cors = require("cors");
 
@@ -10,7 +10,7 @@ dotenv.config({ path: ".env" });
 app.use(express.json());
 app.use(cors());
 app.use(limiter);
-app.use("/api/v1", user);
+app.use("/api/v1", routes);
 
 app.use((_req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

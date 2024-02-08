@@ -1,7 +1,7 @@
 const registrationValidation = require("../validations/registrationValidation");
 const User = require("../models/user");
 const loginValidation = require("../validations/loginValidation");
-const { jwtTokens } = require("../utils/generateToken");
+const { generateJWTToken } = require("../utils/JWTToken");
 const bcrypt = require("bcrypt");
 const { randomTokens } = require("../utils/helper");
 const passwordValidation = require("../validations/passwordValidation");
@@ -92,7 +92,7 @@ const logInUser = async (req, res) => {
           } else if (!isValid) {
             return errorResponseData(res, INCORRECT_PASSWORD, 400);
           } else {
-            const tokenData = jwtTokens(user.id, res);
+            const tokenData = generateJWTToken(user.id, res);
 
             if (profile) {
               responseSuccessWithMessage(
