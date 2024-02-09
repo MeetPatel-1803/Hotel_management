@@ -1,9 +1,9 @@
 const registrationValidation = require("../validations/registrationValidation");
 const User = require("../models/user");
 const loginValidation = require("../validations/loginValidation");
-const jwtTokens = require("../utils/jwtToken");
+const { generateJWTToken } = require("../utils/JWTToken");
 const bcrypt = require("bcrypt");
-const randomTokens = require("../utils/randomToken");
+const { randomTokens } = require("../utils/helper");
 const passwordValidation = require("../validations/passwordValidation");
 const nodemailer = require("nodemailer");
 const {
@@ -11,7 +11,6 @@ const {
   errorResponseData,
   errorResponseWithoutData,
   successResponseWithoutData,
-  successResponseDatasecond,
 } = require("../utils/response");
 const {
   USER_REGISTERED,
@@ -93,20 +92,18 @@ const logInUser = async (req, res) => {
           } else if (!isValid) {
             return errorResponseData(res, INCORRECT_PASSWORD, 400);
           } else {
-            const tokenData = jwtTokens(user.id, res);
+            const tokenData = generateJWTToken(user.id, res);
 
             if (profile) {
-              successResponseDatasecond(
+              responseSuccessWithMessage(
                 res,
-                true,
-                tokenData.token,
+                { isProfileCreated: true, token: tokenData.token },
                 LOGIN_SUCCESSFUL
               );
             } else {
-              successResponseDatasecond(
+              responseSuccessWithMessage(
                 res,
-                false,
-                tokenData.token,
+                { isProfileCreated: false, token: tokenData.token },
                 LOGIN_SUCCESSFUL
               );
             }

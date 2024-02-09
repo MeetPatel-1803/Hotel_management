@@ -8,6 +8,7 @@ const {
 const {
   userProfile,
   userProfileForm,
+  userProfilePicture,
 } = require("../controllers/userProfileController");
 const { isAuthenticatedUser } = require("../middleware/auth");
 const addVehicle = require("../controllers/vehicleController");
@@ -20,6 +21,7 @@ router.post("/reset-password", resetPassword);
 
 router.post("/profile-form", isAuthenticatedUser, userProfileForm);
 router.get("/profile", isAuthenticatedUser, userProfile);
+router.post("/profile-picture", userProfilePicture);
 
 router.post("/vehicle-informaton", isAuthenticatedUser, addVehicle);
 
