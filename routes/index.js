@@ -11,19 +11,35 @@ const {
   userProfilePicture,
 } = require("../controllers/userProfileController");
 const { isAuthenticatedUser } = require("../middleware/auth");
-const {addVehicle, userVehiclePicture} = require("../controllers/vehicleController");
+const {
+  addVehicle,
+  addVehiclePicture,
+  updateVehicleInfo,
+  removeVehiclePicture,
+} = require("../controllers/vehicleController");
 const router = express.Router();
 
+/**
+ * User
+ */
 router.post("/registration", registerUser);
 router.post("/login", logInUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
+/**
+ * Profile
+ */
 router.post("/profile-form", isAuthenticatedUser, userProfileForm);
 router.get("/profile", isAuthenticatedUser, userProfile);
 router.post("/profile-picture", userProfilePicture);
 
+/**
+ * Vehicle
+ */
 router.post("/vehicle-informaton", isAuthenticatedUser, addVehicle);
-router.post("/vehicle-picture", isAuthenticatedUser, userVehiclePicture);
+router.put("/vehicle-information", isAuthenticatedUser, updateVehicleInfo);
+router.post("/vehicle-picture", isAuthenticatedUser, addVehiclePicture);
+router.delete("/vehicle-picture", isAuthenticatedUser, removeVehiclePicture);
 
 module.exports = router;

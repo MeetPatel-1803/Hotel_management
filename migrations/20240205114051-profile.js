@@ -1,5 +1,6 @@
 "use strict";
 const { DataTypes } = require("sequelize");
+const Vehicle = require("../models/userVehicle");
 
 /**
  * It will create table according to specified attributes.
@@ -17,6 +18,13 @@ module.exports = {
         type: DataTypes.INTEGER,
         references: {
           model: "Users",
+          key: "id",
+        },
+      },
+      vehicle_id: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: "vehicles",
           key: "id",
         },
       },
