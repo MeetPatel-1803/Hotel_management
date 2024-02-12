@@ -42,11 +42,11 @@ const Profile = sequelize.define("profiles", {
     type: DataTypes.DATEONLY,
     allowNull: true,
   },
+  profile_picture: {
+    type: DataTypes.STRING(60),
+    allowNull: true,
+    defaultValue: null,
+  },
 });
 
 module.exports = Profile;
-
-// profile_picture: {
-//   type: DataTypes.BLOB("long"),
-//   allowNull: true,
-// },

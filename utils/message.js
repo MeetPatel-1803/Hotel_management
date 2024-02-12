@@ -19,6 +19,8 @@ const responseMessages = {
   VEHICLE_NOT_FOUND: "Vehicle not found",
   IMAGE_REMOVED: "Image removed",
   VEHICLE_IMAGE_NOT_FOUND: "Vehicle image not found",
+  PROFILE_NOT_FOUND: "Profile not found",
+  PROFILE_IMAGE_NOT_FOUND: "Profile image not found",
 };
 
 module.exports = responseMessages;

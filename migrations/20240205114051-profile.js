@@ -53,6 +53,11 @@ module.exports = {
         type: DataTypes.DATEONLY,
         allowNull: true,
       },
+      profile_picture: {
+        type: DataTypes.STRING(60),
+        allowNull: true,
+        defaultValue: null,
+      },
     });
   },
 
