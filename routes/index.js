@@ -9,6 +9,7 @@ const {
   userProfile,
   userProfileForm,
   userProfilePicture,
+  removeProfilePicture,
 } = require("../controllers/userProfileController");
 const { isAuthenticatedUser } = require("../middleware/auth");
 const {
@@ -33,6 +34,7 @@ router.post("/reset-password", resetPassword);
 router.post("/profile-form", isAuthenticatedUser, userProfileForm);
 router.get("/profile", isAuthenticatedUser, userProfile);
 router.post("/profile-picture", userProfilePicture);
+router.delete("/profile-picture",removeProfilePicture)
 
 /**
  * Vehicle

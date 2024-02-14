@@ -1,19 +1,20 @@
 const profileValidation = require("../validations/userProfileValidation");
 const Profile = require("../models/userProfile");
-
 const { randomDigits } = require("../utils/helper");
-
 const {
   PROFILE_FORM_SUBMITTED,
   SOMETHING_WRONG,
   USER_PROFILE_FETCHED,
+  PROFILE_NOT_FOUND,
+  IMAGE_UPLOADED,
+  PROFILE_IMAGE_NOT_FOUND,
 } = require("../utils/message");
-
 const {
   responseSuccessWithMessage,
   errorResponseWithoutData,
 } = require("../utils/response");
-const generatePreSignedUrl = require("../utils/s3Bucket");
+const { generatePreSignedUrl, removeOldImage } = require("../utils/s3Bucket");
+const imageValidation = require("../validations/imageValidation");
 
 /**
  * @description This function will get the information and update about user profile.
@@ -65,15 +66,74 @@ const userProfileForm = async (req, res) => {
  */
 
 const userProfilePicture = async (req, res) => {
-  const imageFile = req.headers.mimetype;
-  const imgExtension = imageFile.split("/")[1];
-  const fileName = `${Date.now()}${randomDigits(4)}.${imgExtension}`;
-  const key = `${process.env.FILE_PATH_PROFILE}/${fileName}`;
-  const expiresIn = 600;
+  const reqParams = req.body;
 
-  const url = generatePreSignedUrl(process.env.AWS_BUCKET_NAME, key, expiresIn);
+  try {
+    imageValidation(reqParams, res, async (validate) => {
+      if (validate) {
+        const imgExtension = reqParams.mimetype.split("/")[1];
+        const imgFileName = reqParams.mimetype.split("/")[0];
+        const fileName = `${Date.now()}${randomDigits(
+          4
+        )}-${imgFileName}.${imgExtension}`;
+        const key = `${process.env.FILE_PATH_PROFILE}/${fileName}`;
+        const expiresIn = 600;
 
-  responseSuccessWithMessage(res, { Profile_image: url }, IMAGE_UPLOADED);
+        const profileImage = await Profile.update(
+          { profile_picture: fileName },
+          { where: { id: reqParams.id } }
+        );
+
+        if (!profileImage) {
+          return errorResponseData(res, PROFILE_NOT_FOUND, 400);
+        }
+
+        const url = generatePreSignedUrl(
+          process.env.AWS_BUCKET_NAME,
+          key,
+          expiresIn
+        );
+        responseSuccessWithMessage(res, { Profile_image: url }, IMAGE_UPLOADED);
+      }
+    });
+  } catch (error) {
+    return errorResponseData(res, error, 400);
+  }
 };
 
-module.exports = { userProfileForm, userProfile, userProfilePicture };
+/**
+ * @description This function will delete uploaded image from database and s3 Bucket.
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+
+const removeProfilePicture = async (req, res) => {
+  const reqParams = req.body;
+  try {
+    const profileImage = await Profile.findOne({
+      where: { id: reqParams.id },
+    });
+
+    if (!profileImage) {
+      return errorResponseData(res, PROFILE_IMAGE_NOT_FOUND, 404);
+    }
+
+    await Profile.update(
+      { profile_picture: null },
+      { where: { profile_picture: profileImage.profile_picture } }
+    );
+
+    const file = `${process.env.FILE_PATH_PROFILE}/${profileImage.profile_picture}`;
+    removeOldImage(process.env.AWS_BUCKET_NAME, file, res);
+  } catch (error) {
+    return errorResponseData(res, error, 400);
+  }
+};
+
+module.exports = {
+  userProfileForm,
+  userProfile,
+  userProfilePicture,
+  removeProfilePicture,
+};
