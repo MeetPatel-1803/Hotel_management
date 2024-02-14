@@ -5,6 +5,7 @@ const responseMessages = {
   INCORRECT_PASSWORD: "Incorrect password",
   LOGIN_SUCCESSFUL: "LogIn Successfully",
   INCORRECT_MAIL: "Incorrect Email",
+  MAIL_NOT_REGISTERED: "Email is not registered with us",
   INCORRECT_TOKEN: "Incorrect Token",
   PASSWORD_UPDATED: "password update successfully",
   TOKEN_EXPIRED: "Your reset password token is expired, please try again",
@@ -21,6 +22,7 @@ const responseMessages = {
   VEHICLE_IMAGE_NOT_FOUND: "Vehicle image not found",
   PROFILE_NOT_FOUND: "Profile not found",
   PROFILE_IMAGE_NOT_FOUND: "Profile image not found",
+  TRIP_CREATED: "Trip created successfully",
 };
 
 module.exports = responseMessages;

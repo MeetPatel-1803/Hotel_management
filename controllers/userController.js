@@ -22,6 +22,7 @@ const {
   PASSWORD_UPDATED,
   TOKEN_EXPIRED,
   LOGIN_SUCCESSFUL,
+  MAIL_NOT_REGISTERED,
 } = require("../utils/message");
 const Profile = require("../models/userProfile");
 
@@ -175,7 +176,7 @@ const forgotPassword = async (req, res) => {
       responseSuccessWithMessage(res, resetPasswordUrl, token);
     }
   } else {
-    errorResponseData(res, INCORRECT_MAIL, 409);
+    errorResponseData(res, MAIL_NOT_REGISTERED, 409);
   }
 };
 

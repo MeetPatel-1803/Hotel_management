@@ -18,6 +18,7 @@ const {
   updateVehicleInfo,
   removeVehiclePicture,
 } = require("../controllers/vehicleController");
+const offerRide = require("../controllers/offerRideController");
 const router = express.Router();
 
 /**
@@ -34,7 +35,7 @@ router.post("/reset-password", resetPassword);
 router.post("/profile-form", isAuthenticatedUser, userProfileForm);
 router.get("/profile", isAuthenticatedUser, userProfile);
 router.post("/profile-picture", userProfilePicture);
-router.delete("/profile-picture",removeProfilePicture)
+router.delete("/profile-picture", removeProfilePicture);
 
 /**
  * Vehicle
@@ -43,5 +44,10 @@ router.post("/vehicle-informaton", isAuthenticatedUser, addVehicle);
 router.put("/vehicle-information", isAuthenticatedUser, updateVehicleInfo);
 router.post("/vehicle-picture", isAuthenticatedUser, addVehiclePicture);
 router.delete("/vehicle-picture", isAuthenticatedUser, removeVehiclePicture);
+
+/**
+ * Rides
+ */
+router.post("/offer-trip", isAuthenticatedUser, offerRide);
 
 module.exports = router;
