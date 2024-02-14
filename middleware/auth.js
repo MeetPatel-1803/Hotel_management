@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { INCORRECT_TOKEN, TOKEN_NOT_GET, UNAUTHORIZED } = require("../message");
+const { INCORRECT_TOKEN, TOKEN_NOT_GET, UNAUTHORIZED } = require("../utils/message");
 const { errorResponseData } = require("../utils/response");
 const { verifyToken } = require("../utils/JWTToken");
 

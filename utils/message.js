@@ -13,7 +13,12 @@ const responseMessages = {
   TOKEN_NOT_GET: "Please Login to access this resource",
   UNAUTHORIZED: "Unauthorized",
   VEHICLE_ADDED: "Vehicel added successfully",
+  VEHICLE_UPDATED: "Vehicel updated successfully",
   USER_PROFILE_FETCHED: "User profile fetched successfully",
+  IMAGE_UPLOADED: "Image Uploaded successfully",
+  VEHICLE_NOT_FOUND: "Vehicle not found",
+  IMAGE_REMOVED: "Image removed",
+  VEHICLE_IMAGE_NOT_FOUND: "Vehicle image not found",
 };
 
 module.exports = responseMessages;

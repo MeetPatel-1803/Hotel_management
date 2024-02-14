@@ -8,7 +8,7 @@ const { DataTypes } = require("sequelize");
 module.exports = {
   async up(queryInterface, Sequelize) {
     return await queryInterface.changeColumn("vehicles", "images", {
-      type: DataTypes.BLOB("long"),
+      type: DataTypes.STRING(60),
       allowNull: true,
       defaultValue: null,
     });
@@ -16,7 +16,7 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     return await queryInterface.changeColumn("vehicles", "images", {
-      type: DataTypes.BLOB("long"),
+      type: DataTypes.STRING(60),
       allowNull: false,
     });
   },

@@ -11,7 +11,7 @@ const { errorResponseData } = require("../utils/response");
 
 const numberPlateValidation = (req, res, callback) => {
   const schema = Joi.object({
-    name: Joi.string(),
+    name: Joi.string().required(),
     type: Joi.string().required(),
     number: Joi.string()
       .required()
@@ -20,7 +20,6 @@ const numberPlateValidation = (req, res, callback) => {
   });
   const { error } = schema.validate(req);
   if (error) {
-    console.log(error);
     return errorResponseData(res, error.message, 401);
   } else {
     return callback(true);

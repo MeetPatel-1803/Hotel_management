@@ -22,7 +22,7 @@ const {
   PASSWORD_UPDATED,
   TOKEN_EXPIRED,
   LOGIN_SUCCESSFUL,
-} = require("../message");
+} = require("../utils/message");
 const Profile = require("../models/userProfile");
 
 /**
