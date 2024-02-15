@@ -23,6 +23,7 @@ const responseMessages = {
   PROFILE_NOT_FOUND: "Profile not found",
   PROFILE_IMAGE_NOT_FOUND: "Profile image not found",
   TRIP_CREATED: "Trip created successfully",
+  AVAILABLE_TRIPS_FETCHED: "Available trips are fetched",
 };
 
 module.exports = responseMessages;
