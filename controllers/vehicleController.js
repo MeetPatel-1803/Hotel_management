@@ -6,6 +6,7 @@ const {
   VEHICLE_UPDATED,
   VEHICLE_NOT_FOUND,
   VEHICLE_IMAGE_NOT_FOUND,
+  VEHICLES_FETCHED_SUCCESSFULLY,
 } = require("../utils/message");
 const {
   responseSuccessWithMessage,
@@ -139,7 +140,7 @@ const removeVehiclePicture = async (req, res) => {
 
     if (!vehicleImage) {
       return errorResponseData(res, VEHICLE_IMAGE_NOT_FOUND, 404);
-    } 
+    }
 
     await Vehicle.update(
       { images: null },
@@ -148,9 +149,30 @@ const removeVehiclePicture = async (req, res) => {
 
     const file = `${process.env.FILE_PATH_VEHICLE}/${vehicleImage.images}`;
     removeOldImage(process.env.AWS_BUCKET_NAME, file, res);
-
   } catch (error) {
     return errorResponseData(res, error, 400);
+  }
+};
+
+/**
+ * @description This function will collect all vehicles based on user id.
+ * @param {*} req
+ * @param {*} res
+ */
+
+const getUserVehicleCollection = async (req, res) => {
+  try {
+    const vehicleCollection = await Vehicle.findAll({
+      where: { user_id: req.id },
+    });
+
+    responseSuccessWithMessage(
+      res,
+      { vehicleCollection: vehicleCollection },
+      VEHICLES_FETCHED_SUCCESSFULLY
+    );
+  } catch (error) {
+    return errorResponseData(res, error);
   }
 };
 
@@ -159,4 +181,5 @@ module.exports = {
   updateVehicleInfo,
   addVehiclePicture,
   removeVehiclePicture,
+  getUserVehicleCollection,
 };

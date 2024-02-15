@@ -11,7 +11,7 @@ const responseMessages = {
   TOKEN_EXPIRED: "Your reset password token is expired, please try again",
   PROFILE_FORM_SUBMITTED: "Profile created",
   SOMETHING_WRONG: "Something went wrong !",
-  TOKEN_NOT_GET: "Please Login to access this resource",
+  TOKEN_NOT_FOUND: "Please Login to access this resource",
   UNAUTHORIZED: "Unauthorized",
   VEHICLE_ADDED: "Vehicel added successfully",
   VEHICLE_UPDATED: "Vehicel updated successfully",
@@ -24,6 +24,7 @@ const responseMessages = {
   PROFILE_IMAGE_NOT_FOUND: "Profile image not found",
   TRIP_CREATED: "Trip created successfully",
   AVAILABLE_TRIPS_FETCHED: "Available trips are fetched",
+  VEHICLES_FETCHED_SUCCESSFULLY: "Vehicles are fetched successfully",
 };
 
 module.exports = responseMessages;

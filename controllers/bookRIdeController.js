@@ -1,5 +1,5 @@
 const Trip = require("../models/trip");
-const { AVAILABLE_TRIPS_FETCHED, TOKEN_NOT_GET } = require("../utils/message");
+const { AVAILABLE_TRIPS_FETCHED, TOKEN_NOT_FOUND } = require("../utils/message");
 const {
   errorResponseData,
   responseSuccessWithMessage,
@@ -31,7 +31,7 @@ const bookRide = async (req, res) => {
         });
 
         if (!availableTrips) {
-          return errorResponseData(res, TOKEN_NOT_GET);
+          return errorResponseData(res, TOKEN_NOT_FOUND);
         }
         responseSuccessWithMessage(
           res,
