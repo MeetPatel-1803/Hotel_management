@@ -9,14 +9,16 @@ const postRideValidation = require("../validations/postRideValidation");
 
 /**
  * @description This function will create a trip for who want to provide trip.
- * @param {*} req 
- * @param {*} res 
+ * @param {*} req
+ * @param {*} res
  */
 
 const offerRide = async (req, res) => {
   const reqParams = req.body;
 
-  const vehicleId = await Vehicle.findByPk(req.id);
+  const vehicleId = await Vehicle.findAll({
+    where: { user_id: req.id },
+  });
 
   postRideValidation(reqParams, res, async (validate) => {
     if (validate) {
