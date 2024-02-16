@@ -12,10 +12,10 @@ const filteredRides = async (req, res) => {
       const availableRides = await Trip.findAll({
         where: {
           user_id: { [Op.ne]: req.id },
-          Source_lat: reqParams.Source_lat,
-          Source_long: reqParams.Source_long,
-          dest_lat: reqParams.dest_lat,
-          dest_long: reqParams.dest_long,
+          source_lat: reqParams.sourceLat,
+          source_long: reqParams.sourceLong,
+          dest_lat: reqParams.destLat,
+          dest_long: reqParams.destLong,
         },
       });
 
@@ -41,7 +41,7 @@ const allRides = async (req, res) => {
         ["dest_address", "ASC"],
       ],
     });
-    
+
     return responseSuccessWithMessage(
       res,
       { availableRides: availableRides },

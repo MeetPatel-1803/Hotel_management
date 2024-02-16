@@ -4,7 +4,7 @@ const {
   errorResponseData,
   responseSuccessWithMessage,
 } = require("../utils/response");
-const postRideValidation = require("../validations/offerRideValidation");
+const offerRideValidation = require("../validations/offerRideValidation");
 
 /**
  * @description This function will create a trip for who want to provide trip.
@@ -15,21 +15,21 @@ const offerRide = async (req, res) => {
   try {
     const reqParams = req.body;
 
-    postRideValidation(reqParams, res, async (validate) => {
+    offerRideValidation(reqParams, res, async (validate) => {
       if (validate) {
         const ride = await Trip.create({
           user_id: req.id,
-          source_address: reqParams.Source_address,
-          Source_lat: reqParams.Source_lat,
-          Source_long: reqParams.Source_long,
-          dest_address: reqParams.dest_address,
-          dest_lat: reqParams.dest_lat,
-          dest_long: reqParams.dest_long,
-          departure_date: reqParams.departure_date,
-          departure_time: reqParams.departure_time,
-          available_seats: reqParams.available_seats,
+          source_address: reqParams.sourceAddress,
+          source_lat: reqParams.sourceLat,
+          source_long: reqParams.sourceLong,
+          dest_address: reqParams.destAddress,
+          dest_lat: reqParams.destLat,
+          dest_long: reqParams.destLong,
+          departure_date: reqParams.departureDate,
+          departure_time: reqParams.departureTime,
+          available_seats: reqParams.availableSeats,
           fare: reqParams.fare,
-          vehicle_id: reqParams.vehicle_id,
+          vehicle_id: reqParams.vehicleId,
         });
 
         if (!ride) {

@@ -160,7 +160,7 @@ const removeVehiclePicture = async (req, res) => {
  * @param {*} res
  */
 
-const getUserVehicleCollection = async (req, res) => {
+const getUserVehicles = async (req, res) => {
   try {
     const vehicleCollection = await Vehicle.findAll({
       where: { user_id: req.id },
@@ -181,5 +181,5 @@ module.exports = {
   updateVehicleInfo,
   addVehiclePicture,
   removeVehiclePicture,
-  getUserVehicleCollection,
+  getUserVehicles,
 };

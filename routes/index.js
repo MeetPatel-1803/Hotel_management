@@ -17,10 +17,9 @@ const {
   addVehiclePicture,
   updateVehicleInfo,
   removeVehiclePicture,
-  getUserVehicleCollection,
+  getUserVehicles,
 } = require("../controllers/vehicleController");
 const offerRide = require("../controllers/offerRideController");
-const bookRide = require("../controllers/bookRIdeController");
 const {
   filteredRides,
   allRides,
@@ -55,8 +54,7 @@ router.delete("/vehicle-picture", isAuthenticatedUser, removeVehiclePicture);
  * Rides
  */
 router.post("/offer-trip", isAuthenticatedUser, offerRide);
-router.get("/offer-trip", isAuthenticatedUser, getUserVehicleCollection);
-router.get("/book-trip", isAuthenticatedUser, bookRide);
+router.get("/offer-trip", isAuthenticatedUser, getUserVehicles);
 router.get("/find-trip", isAuthenticatedUser, filteredRides);
 router.get("/find-trip", isAuthenticatedUser, allRides);
 
