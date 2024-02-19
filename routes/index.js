@@ -20,10 +20,7 @@ const {
   getUserVehicles,
 } = require("../controllers/vehicleController");
 const offerRide = require("../controllers/offerRideController");
-const {
-  filteredRides,
-  allRides,
-} = require("../controllers/availableRidesController");
+const filteredRides = require("../controllers/availableRidesController");
 const router = express.Router();
 
 /**
@@ -56,6 +53,5 @@ router.delete("/vehicle-picture", isAuthenticatedUser, removeVehiclePicture);
 router.post("/offer-trip", isAuthenticatedUser, offerRide);
 router.get("/offer-trip", isAuthenticatedUser, getUserVehicles);
 router.get("/find-trip", isAuthenticatedUser, filteredRides);
-router.get("/find-trip", isAuthenticatedUser, allRides);
 
 module.exports = router;
