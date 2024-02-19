@@ -23,8 +23,9 @@ const responseMessages = {
   PROFILE_NOT_FOUND: "Profile not found",
   PROFILE_IMAGE_NOT_FOUND: "Profile image not found",
   TRIP_CREATED: "Your ride has been created successfully",
-  AVAILABLE_TRIPS_FETCHED: "Available trips are fetched",
+  AVAILABLE_TRIPS_FETCHED: "Available rides list is fetched successfully",
   VEHICLES_FETCHED_SUCCESSFULLY: "Vehicles are fetched successfully",
+  NO_RIDES_FOUND:"There are no rides yet between these cities"
 };
 
 module.exports = responseMessages;
