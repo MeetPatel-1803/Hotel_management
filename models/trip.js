@@ -28,11 +28,11 @@ const Trip = sequelize.define("trips", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  Source_lat: {
+  source_lat: {
     type: DataTypes.DECIMAL(15, 10),
     allowNull: false,
   },
-  Source_long: {
+  source_long: {
     type: DataTypes.DECIMAL(15, 10),
     allowNull: false,
   },

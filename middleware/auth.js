@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { INCORRECT_TOKEN, TOKEN_NOT_GET, UNAUTHORIZED } = require("../utils/message");
+const { INCORRECT_TOKEN, TOKEN_NOT_FOUND, UNAUTHORIZED } = require("../utils/message");
 const { errorResponseData } = require("../utils/response");
 const { verifyToken } = require("../utils/JWTToken");
 
@@ -11,7 +11,7 @@ const isAuthenticatedUser = (req, res, next) => {
   const token = authToken[1];
 
   if (!token) {
-    return errorResponseData(res, TOKEN_NOT_GET, 401);
+    return errorResponseData(res, TOKEN_NOT_FOUND, 401);
   }
 
   const decodedToken = verifyToken(token);
