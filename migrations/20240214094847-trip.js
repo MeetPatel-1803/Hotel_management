@@ -63,6 +63,7 @@ module.exports = {
       available_seats: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue:0
       },
       fare: {
         type: DataTypes.DECIMAL(20, 10),
