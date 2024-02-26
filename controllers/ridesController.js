@@ -62,7 +62,7 @@ const offerRide = async (req, res) => {
 const availableRidesList = async (req, res) => {
   try {
     const reqParams = req.query;
-
+   
     availableRideListValidation(reqParams, res, async (validate) => {
       if (validate) {
         const page = reqParams.page
@@ -116,7 +116,7 @@ const availableRidesList = async (req, res) => {
             ...(reqParams.no_of_passanger
               ? {
                   available_seats: {
-                    [Op.eq]: parseInt(reqParams.no_of_passanger),
+                    [Op.gte]: parseInt(reqParams.no_of_passanger),
                   },
                 }
               : { available_seats: { [Op.gte]: 1 } }),
