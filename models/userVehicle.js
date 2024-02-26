@@ -22,8 +22,19 @@ const Vehicle = sequelize.define("vehicles", {
     allowNull: false,
   },
   type: {
-    type: DataTypes.STRING(20),
+    type: DataTypes.ENUM,
     allowNull: false,
+    values: [
+      "SUV",
+      "Sedan",
+      "Hatchback",
+      "Coupe",
+      "Van",
+      "Compact Sedan",
+      "Compact SUV",
+      "MUV",
+    ],
+    defaultValue: "Hatchback",
   },
   number: {
     type: DataTypes.STRING(20),
