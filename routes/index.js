@@ -4,7 +4,7 @@ const {
   logInUser,
   forgotPassword,
   resetPassword,
-} = require("../controllers/userController");
+} = require("../controllers/authController");
 const {
   userProfile,
   userProfileForm,
@@ -37,7 +37,7 @@ router.post("/reset-password", resetPassword);
 /**
  * Profile
  */
-router.post("/profile-form", isAuthenticatedUser, userProfileForm);
+router.post("/profile", isAuthenticatedUser, userProfileForm);
 router.get("/profile", isAuthenticatedUser, userProfile);
 router.post("/profile-picture", userProfilePicture);
 router.delete("/profile-picture", removeProfilePicture);
