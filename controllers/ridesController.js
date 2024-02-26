@@ -7,48 +7,119 @@ const {
   TRIP_CREATED,
   AVAILABLE_TRIPS_FETCHED,
   NO_RIDES_FOUND,
+  TRIP_NOT_FOUND,
+  CANNOT_EDIT_A_TRIP,
+  CANCEL_OFFERED_RIDE,
+  TRIP_UPDATED,
+  RIDE_CANCEL_CONFIRMATION,
 } = require("../utils/message");
 const {
   errorResponseData,
   responseSuccessWithMessage,
+  successResponseWithoutData,
 } = require("../utils/response");
-const offerRideValidation = require("../validations/offerRideValidation");
+const addEditOfferRideValidation = require("../validations/offerRideValidation");
 const availableRideListValidation = require("../validations/availableRideListValidation");
+const bookingRequests = require("../models/booking_requests");
+const sequelize = require("../config/database");
 
 /**
  * @description This function will create a trip for who want to provide trip.
  * @param {*} req
  * @param {*} res
  */
-const offerRide = async (req, res) => {
+const addEditOfferRide = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const reqParams = req.body;
 
-    offerRideValidation(reqParams, res, async (validate) => {
+    addEditOfferRideValidation(reqParams, res, async (validate) => {
       if (validate) {
-        const ride = await Trip.create({
-          user_id: req.id,
-          source_address: reqParams.sourceAddress,
-          source_lat: reqParams.sourceLat,
-          source_long: reqParams.sourceLong,
-          dest_address: reqParams.destAddress,
-          dest_lat: reqParams.destLat,
-          dest_long: reqParams.destLong,
-          departure_date: reqParams.departureDate,
-          departure_time: reqParams.departureTime,
-          available_seats: reqParams.availableSeats,
-          fare: reqParams.fare,
-          vehicle_id: reqParams.vehicleId,
-        });
+        if (reqParams.trip_id && reqParams.editOfferRide) {
+          const tripExist = await Trip.findOne({
+            where: { id: reqParams.trip_id },
+          });
 
-        if (!ride) {
-          return errorResponseData(res, SOMETHING_WRONG, 500);
+          if (!tripExist) {
+            return errorResponseData(res, TRIP_NOT_FOUND);
+          }
+
+          const isTripStatusAccepted = await bookingRequests.findAll({
+            where: { trip_id: reqParams.trip_id, trip_status: "Accepted" },
+            attributes: ["trip_id", "trip_status"],
+          });
+
+          if (isTripStatusAccepted.length == 0) {
+            const updateCondition = {
+              source_address: reqParams.sourceAddress,
+              source_lat: reqParams.sourceLat,
+              source_long: reqParams.sourceLong,
+              dest_address: reqParams.destAddress,
+              dest_lat: reqParams.destLat,
+              dest_long: reqParams.destLong,
+              departure_date: reqParams.departureDate,
+              departure_time: reqParams.departureTime,
+              available_seats: reqParams.availableSeats,
+              fare: reqParams.fare,
+              vehicle_id: reqParams.vehicleId,
+            };
+
+            await Trip.update(updateCondition, {
+              where: { id: reqParams.trip_id },
+            });
+
+            const updatedTrip = await Trip.findOne({
+              where: { id: reqParams.trip_id },
+            });
+
+            await transaction.commit();
+            responseSuccessWithMessage(res, updatedTrip, TRIP_UPDATED);
+          } else {
+            return errorResponseData(res, CANNOT_EDIT_A_TRIP);
+          }
+        } else if (reqParams.trip_id && reqParams.cancelOfferRide) {
+          const tripExist = await Trip.findOne({
+            where: { id: reqParams.trip_id },
+          });
+
+          if (!tripExist) {
+            return errorResponseData(res, TRIP_NOT_FOUND);
+          }
+
+          await Trip.destroy({
+            where: { id: reqParams.trip_id },
+          });
+
+          await transaction.commit();
+          successResponseWithoutData(res, CANCEL_OFFERED_RIDE);
+        } else {
+          const ride = await Trip.create({
+            user_id: req.id,
+            source_address: reqParams.sourceAddress,
+            source_lat: reqParams.sourceLat,
+            source_long: reqParams.sourceLong,
+            dest_address: reqParams.destAddress,
+            dest_lat: reqParams.destLat,
+            dest_long: reqParams.destLong,
+            departure_date: reqParams.departureDate,
+            departure_time: reqParams.departureTime,
+            available_seats: reqParams.availableSeats,
+            fare: reqParams.fare,
+            vehicle_id: reqParams.vehicleId,
+          });
+
+          if (!ride) {
+            return errorResponseData(res, SOMETHING_WRONG, 500);
+          }
+
+          await transaction.commit();
+          responseSuccessWithMessage(res, ride, TRIP_CREATED);
         }
-        responseSuccessWithMessage(res, ride, TRIP_CREATED);
       }
     });
   } catch (error) {
-    return errorResponseData(res, error);
+    await transaction.rollback();
+    return errorResponseData(res, error.message);
   }
 };
 
@@ -62,7 +133,7 @@ const offerRide = async (req, res) => {
 const availableRidesList = async (req, res) => {
   try {
     const reqParams = req.query;
-   
+
     availableRideListValidation(reqParams, res, async (validate) => {
       if (validate) {
         const page = reqParams.page
@@ -154,4 +225,4 @@ const availableRidesList = async (req, res) => {
   }
 };
 
-module.exports = { offerRide, availableRidesList };
+module.exports = { addEditOfferRide, availableRidesList };

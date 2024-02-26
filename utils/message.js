@@ -31,6 +31,12 @@ const responseMessages = {
   RIDE_IS_FULL: "Ride is full no more seats are available ",
   RIDE_BOOKED_SUCCESSFULLY: "Your ride is booked successfully",
   PROFILE_UPDATED: "Profile updated successfully",
+  TRIP_NOT_FOUND: "Trip not found",
+  CANNOT_EDIT_A_TRIP: "You have accepted a trip, you can't edit trip.",
+  TRIP_UPDATED: "Trip updated successfully",
+  CANCEL_OFFERED_RIDE: "You cancelled your offered ride",
+  RIDE_CANCEL_CONFIRMATION:
+    "You have accepted a ride , still you want to cancel your ride ?",
 };
 
 module.exports = responseMessages;

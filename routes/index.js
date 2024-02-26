@@ -19,7 +19,7 @@ const {
   getUserVehiclesList,
 } = require("../controllers/vehicleController");
 const {
-  offerRide,
+  addEditOfferRide,
   availableRidesList,
 } = require("../controllers/ridesController");
 const addEditRideRequest = require("../controllers/bookingRequestController");
@@ -51,7 +51,7 @@ router.delete("/remove-vehicle-picture", isAuthenticatedUser, removeVehiclePictu
 /**
  * Rides
  */
-router.post("/offer-trip", isAuthenticatedUser, offerRide);
+router.post("/offer-trip", isAuthenticatedUser, addEditOfferRide);
 router.get("/user-vehicles-list", isAuthenticatedUser, getUserVehiclesList);
 router.get("/find-trip", isAuthenticatedUser, availableRidesList);
 
