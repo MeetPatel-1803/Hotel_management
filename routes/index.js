@@ -23,6 +23,7 @@ const {
   offerRide,
   availableRidesList,
 } = require("../controllers/ridesController");
+const addEditRideRequest = require("../controllers/bookingRequestController");
 const router = express.Router();
 
 /**
@@ -56,4 +57,8 @@ router.post("/offer-trip", isAuthenticatedUser, offerRide);
 router.get("/offer-trip", isAuthenticatedUser, getUserVehicles);
 router.get("/find-trip", isAuthenticatedUser, availableRidesList);
 
+/**
+ * booking requested ride
+ */
+router.post("/ride-booking", isAuthenticatedUser, addEditRideRequest);
 module.exports = router;

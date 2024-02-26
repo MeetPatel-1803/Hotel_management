@@ -25,7 +25,11 @@ const responseMessages = {
   TRIP_CREATED: "Your ride has been created successfully",
   AVAILABLE_TRIPS_FETCHED: "Available rides list is fetched successfully",
   VEHICLES_FETCHED_SUCCESSFULLY: "Vehicles are fetched successfully",
-  NO_RIDES_FOUND:"There are no rides yet between these cities"
+  NO_RIDES_FOUND: "There are no rides yet between these cities",
+  BOOKING_REQUEST_CREATED: "Booking request created successfully",
+  SEATS_ARE_NOT_AVAILABLE: "No of seates are less than your requirement",
+  RIDE_IS_FULL: "Ride is full no more seats are available ",
+  RIDE_BOOKED_SUCCESSFULLY: "Your ride is booked successfully",
 };
 
 module.exports = responseMessages;
