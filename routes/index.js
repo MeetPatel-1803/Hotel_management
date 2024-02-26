@@ -6,9 +6,9 @@ const {
   resetPassword,
 } = require("../controllers/authController");
 const {
-  userProfile,
-  userProfileForm,
-  userProfilePicture,
+  getProfile,
+  addEditProfile,
+  addEditProfilePicture,
   removeProfilePicture,
 } = require("../controllers/userProfileController");
 const { isAuthenticatedUser } = require("../middleware/auth");
@@ -37,10 +37,10 @@ router.post("/reset-password", resetPassword);
 /**
  * Profile
  */
-router.post("/profile", isAuthenticatedUser, userProfileForm);
-router.get("/profile", isAuthenticatedUser, userProfile);
-router.post("/profile-picture", userProfilePicture);
-router.delete("/profile-picture", removeProfilePicture);
+router.post("/profile", isAuthenticatedUser, addEditProfile);
+router.get("/profile", isAuthenticatedUser, getProfile);
+router.post("/change-profile-picture", isAuthenticatedUser, addEditProfilePicture);
+router.delete("/remove-profile-picture", isAuthenticatedUser, removeProfilePicture);
 
 /**
  * Vehicle

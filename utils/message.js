@@ -30,6 +30,7 @@ const responseMessages = {
   SEATS_ARE_NOT_AVAILABLE: "No of seates are less than your requirement",
   RIDE_IS_FULL: "Ride is full no more seats are available ",
   RIDE_BOOKED_SUCCESSFULLY: "Your ride is booked successfully",
+  PROFILE_UPDATED: "Profile updated successfully",
 };
 
 module.exports = responseMessages;
