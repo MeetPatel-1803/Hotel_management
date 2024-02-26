@@ -13,11 +13,10 @@ const {
 } = require("../controllers/userProfileController");
 const { isAuthenticatedUser } = require("../middleware/auth");
 const {
-  addVehicle,
-  addVehiclePicture,
-  updateVehicleInfo,
+  addEditVehicle,
+  addEditVehiclePicture,
   removeVehiclePicture,
-  getUserVehicles,
+  getUserVehiclesList,
 } = require("../controllers/vehicleController");
 const {
   offerRide,
@@ -45,16 +44,15 @@ router.delete("/remove-profile-picture", isAuthenticatedUser, removeProfilePictu
 /**
  * Vehicle
  */
-router.post("/vehicle-informaton", isAuthenticatedUser, addVehicle);
-router.put("/vehicle-information", isAuthenticatedUser, updateVehicleInfo);
-router.post("/vehicle-picture", isAuthenticatedUser, addVehiclePicture);
-router.delete("/vehicle-picture", isAuthenticatedUser, removeVehiclePicture);
+router.post("/vehicle-informaton", isAuthenticatedUser, addEditVehicle);
+router.post("/change-vehicle-picture", isAuthenticatedUser, addEditVehiclePicture);
+router.delete("/remove-vehicle-picture", isAuthenticatedUser, removeVehiclePicture);
 
 /**
  * Rides
  */
 router.post("/offer-trip", isAuthenticatedUser, offerRide);
-router.get("/offer-trip", isAuthenticatedUser, getUserVehicles);
+router.get("/user-vehicles-list", isAuthenticatedUser, getUserVehiclesList);
 router.get("/find-trip", isAuthenticatedUser, availableRidesList);
 
 /**

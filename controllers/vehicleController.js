@@ -1,4 +1,4 @@
-const numberPlateValidation = require("../validations/numberPlateValidation");
+const addEditVehicleValidation = require("../validations/addEditVehicleValidation");
 const Vehicle = require("../models/userVehicle");
 const {
   VEHICLE_ADDED,
@@ -18,67 +18,65 @@ const { generatePreSignedUrl, removeOldImage } = require("../utils/s3Bucket");
 const imageValidation = require("../validations/imageValidation");
 
 /**
- * @description This function will store information about user vehicle.
+ * @description This function will add user vehicle and can update also.
  * @param {*} req
  * @param {*} res
  */
-const addVehicle = async (req, res) => {
-  const reqParams = req.body;
+const addEditVehicle = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const reqParams = req.body;
 
-  numberPlateValidation(reqParams, res, async (validate) => {
-    if (validate) {
-      const transaction = await sequelize.transaction();
-      try {
-        const vehicle = await Vehicle.create({
-          user_id: req.id,
-          name: reqParams.name,
-          type: reqParams.type,
-          number: reqParams.number,
-          no_of_seats: reqParams.no_of_seats,
-        });
+    addEditVehicleValidation(reqParams, res, async (validate) => {
+      if (validate) {
+        if (reqParams.id && reqParams.updateVehicle) {
+          const vehicleExist = await Vehicle.findOne({
+            where: { id: reqParams.id },
+          });
 
-        await transaction.commit();
+          if (!vehicleExist) {
+            return errorResponseData(res, VEHICLE_NOT_FOUND);
+          }
 
-        responseSuccessWithMessage(res, vehicle, VEHICLE_ADDED);
-      } catch (error) {
-        await transaction.rollback();
-        return errorResponseData(res, error.message, 400);
-      }
-    }
-  });
-};
-
-/**
- * @description This function will update vehicle information.
- * @param {*} req
- * @param {*} res
- */
-const updateVehicleInfo = async (req, res) => {
-  const reqParams = req.body;
-
-  numberPlateValidation(reqParams, res, async (validate) => {
-    if (validate) {
-      const transaction = await sequelize.transaction();
-      try {
-        const vehicle = await Vehicle.update(
-          {
+          const updateCondition = {
             name: reqParams.name,
             type: reqParams.type,
             number: reqParams.number,
             no_of_seats: reqParams.no_of_seats,
-          },
-          { where: { number: reqParams.number } }
-        );
+          };
 
-        await transaction.commit();
+          await Vehicle.update(updateCondition, {
+            where: { id: reqParams.id },
+          });
 
-        responseSuccessWithMessage(res, vehicle, VEHICLE_UPDATED);
-      } catch (error) {
-        await transaction.rollback();
-        return errorResponseData(res, error.errors[0].message, 400);
+          const updatedVehicle = await Vehicle.findOne({
+            where: { id: reqParams.id },
+          });
+
+          await transaction.commit();
+          responseSuccessWithMessage(
+            res,
+            { updatedVehicle: updatedVehicle },
+            VEHICLE_UPDATED
+          );
+        } else {
+          const setData = await Vehicle.create({
+            user_id: req.id,
+            name: reqParams.name,
+            type: reqParams.type,
+            number: reqParams.number,
+            no_of_seats: reqParams.no_of_seats,
+          });
+
+          await transaction.commit();
+          responseSuccessWithMessage(res, setData, VEHICLE_ADDED);
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return errorResponseData(res, error.message);
+  }
 };
 
 /**
@@ -86,9 +84,9 @@ const updateVehicleInfo = async (req, res) => {
  * @param {*} req
  * @param {*} res
  */
-const addVehiclePicture = async (req, res) => {
-  const reqParams = req.body;
+const addEditVehiclePicture = async (req, res) => {
   try {
+    const reqParams = req.body;
     imageValidation(reqParams, res, async (validate) => {
       if (validate) {
         const imgExtension = reqParams.mimetype.split("/")[1];
@@ -120,7 +118,7 @@ const addVehiclePicture = async (req, res) => {
       }
     });
   } catch (error) {
-    return errorResponseData(res, error, 400);
+    return errorResponseData(res, error.message, 400);
   }
 };
 
@@ -150,7 +148,7 @@ const removeVehiclePicture = async (req, res) => {
     const file = `${process.env.FILE_PATH_VEHICLE}/${vehicleImage.images}`;
     removeOldImage(process.env.AWS_BUCKET_NAME, file, res);
   } catch (error) {
-    return errorResponseData(res, error, 400);
+    return errorResponseData(res, error.message, 400);
   }
 };
 
@@ -160,15 +158,15 @@ const removeVehiclePicture = async (req, res) => {
  * @param {*} res
  */
 
-const getUserVehicles = async (req, res) => {
+const getUserVehiclesList = async (req, res) => {
   try {
-    const vehicleCollection = await Vehicle.findAll({
+    const vehicleList = await Vehicle.findAll({
       where: { user_id: req.id },
     });
 
     responseSuccessWithMessage(
       res,
-      { vehicleCollection: vehicleCollection },
+      { vehicleList: vehicleList },
       VEHICLES_FETCHED_SUCCESSFULLY
     );
   } catch (error) {
@@ -177,9 +175,8 @@ const getUserVehicles = async (req, res) => {
 };
 
 module.exports = {
-  addVehicle,
-  updateVehicleInfo,
-  addVehiclePicture,
+  addEditVehicle,
+  addEditVehiclePicture,
   removeVehiclePicture,
-  getUserVehicles,
+  getUserVehiclesList,
 };

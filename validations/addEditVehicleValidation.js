@@ -9,10 +9,25 @@ const { errorResponseData } = require("../utils/response");
  * @returns
  */
 
-const numberPlateValidation = (req, res, callback) => {
+const addEditVehicleValidation = (req, res, callback) => {
   const schema = Joi.object({
+    id: Joi.number(),
+    updateVehicle: Joi.boolean(),
     name: Joi.string().required(),
-    type: Joi.string().required(),
+    type: Joi.string()
+      .valid(
+        "SUV",
+        "Sedan",
+        "Hatchback",
+        "Coupe",
+        "Van",
+        "Compact Sedan",
+        "Compact SUV",
+        "MUV"
+      )
+      .trim()
+      .insensitive()
+      .required(),
     number: Joi.string()
       .required()
       .pattern(/^[A-Z]{2}[ -]?[0-9]{2}[ -]?[A-Z]{1,2}[ -]?[0-9]{4}$/),
@@ -25,4 +40,4 @@ const numberPlateValidation = (req, res, callback) => {
     return callback(true);
   }
 };
-module.exports = numberPlateValidation;
+module.exports = addEditVehicleValidation;
