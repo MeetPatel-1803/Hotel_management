@@ -37,6 +37,7 @@ const responseMessages = {
   CANCEL_OFFERED_RIDE: "You cancelled your offered ride",
   RIDE_CANCEL_CONFIRMATION:
     "You have accepted a ride , still you want to cancel your ride ?",
+  INCORRECT_OLD_PASSWORD: "Incorrect old password",
 };
 
 module.exports = responseMessages;

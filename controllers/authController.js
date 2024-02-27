@@ -23,8 +23,11 @@ const {
   TOKEN_EXPIRED,
   LOGIN_SUCCESSFUL,
   MAIL_NOT_REGISTERED,
+  INCORRECT_OLD_PASSWORD,
+  SOMETHING_WRONG,
 } = require("../utils/message");
 const Profile = require("../models/userProfile");
+const changePasswordVlidation = require("../validations/changePasswordVlidation");
 
 /**
  * @description It will register a user and validate its credentials.
@@ -226,9 +229,59 @@ const resetPassword = async (req, res) => {
   });
 };
 
+/**
+ * @description This function will change user's password based on old password.
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+
+const changePassword = async (req, res) => {
+  try {
+    const reqParams = req.body;
+
+    changePasswordVlidation(reqParams, res, async (validate) => {
+      if (validate) {
+        const userData = await User.findOne({ where: { id: req.id } });
+
+        bcrypt.compare(
+          reqParams.oldPassword,
+          userData.password,
+          async (err, isValid) => {
+            if (err) {
+              return errorResponseData(res, err);
+            } else if (!isValid) {
+              return errorResponseData(res, INCORRECT_OLD_PASSWORD);
+            } else {
+              bcrypt.hash(reqParams.newPassword, 10, async (err, hash) => {
+                if (err) {
+                  return errorResponseData(res, err);
+                } else {
+                  const setData = await User.update(
+                    { password: hash },
+                    { where: { id: req.id } }
+                  );
+
+                  if (!setData) {
+                    return errorResponseWithoutData(res, SOMETHING_WRONG);
+                  }
+                  successResponseWithoutData(res, PASSWORD_UPDATED);
+                }
+              });
+            }
+          }
+        );
+      }
+    });
+  } catch (error) {
+    return errorResponseData(res, error.message);
+  }
+};
+
 module.exports = {
   registerUser,
   logInUser,
   forgotPassword,
   resetPassword,
+  changePassword,
 };

@@ -7,6 +7,7 @@ const {
   logInUser,
   forgotPassword,
   resetPassword,
+  changePassword,
 } = require("../../controllers/authController");
 const {
   getProfile,
@@ -50,6 +51,7 @@ router.delete(
   isAuthenticatedUser,
   removeProfilePicture
 );
+router.post("/change-password", isAuthenticatedUser, changePassword);
 
 /**
  * Vehicle
