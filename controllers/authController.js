@@ -27,7 +27,7 @@ const {
   SOMETHING_WRONG,
 } = require("../utils/message");
 const Profile = require("../models/userProfile");
-const changePasswordVlidation = require("../validations/changePasswordVlidation");
+const changePasswordValidation = require("../validations/changePasswordValidation");
 
 /**
  * @description It will register a user and validate its credentials.
@@ -240,7 +240,7 @@ const changePassword = async (req, res) => {
   try {
     const reqParams = req.body;
 
-    changePasswordVlidation(reqParams, res, async (validate) => {
+    changePasswordValidation(reqParams, res, async (validate) => {
       if (validate) {
         const userData = await User.findOne({ where: { id: req.id } });
 

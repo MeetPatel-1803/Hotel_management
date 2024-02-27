@@ -9,7 +9,7 @@ const { errorResponseData } = require("../utils/response");
  * @returns
  */
 
-const changePasswordVlidation = (req, res, callback) => {
+const changePasswordValidation = (req, res, callback) => {
   const schema = Joi.object({
     oldPassword: Joi.string(),
     newPassword: Joi.string()
@@ -30,4 +30,4 @@ const changePasswordVlidation = (req, res, callback) => {
   }
 };
 
-module.exports = changePasswordVlidation;
+module.exports = changePasswordValidation;
