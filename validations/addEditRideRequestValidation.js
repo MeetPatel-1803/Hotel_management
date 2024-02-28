@@ -11,7 +11,7 @@ const { errorResponseData } = require("../utils/response");
 
 const addEditRideRequestValidation = (req, res, callback) => {
   const schema = Joi.object({
-    trip_id: Joi.number().required(),
+    booking_request_id: Joi.number().required(),
     user_id: Joi.number(),
     is_Accepted: Joi.boolean(),
     no_of_passanger: Joi.number().required(),

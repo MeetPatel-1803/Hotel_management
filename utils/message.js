@@ -29,7 +29,7 @@ const responseMessages = {
   BOOKING_REQUEST_CREATED: "Booking request created successfully",
   SEATS_ARE_NOT_AVAILABLE: "No of seates are less than your requirement",
   RIDE_IS_FULL: "Ride is full no more seats are available ",
-  RIDE_BOOKED_SUCCESSFULLY: "Your ride is booked successfully",
+  BOOKING_REQUEST_ACCEPTED: "Your booking request accepted",
   PROFILE_UPDATED: "Profile updated successfully",
   TRIP_NOT_FOUND: "Trip not found",
   CANNOT_EDIT_A_TRIP: "You have accepted a trip, you can't edit trip.",
