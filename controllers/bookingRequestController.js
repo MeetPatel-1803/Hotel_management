@@ -1,5 +1,5 @@
 const { Sequelize } = require("sequelize");
-const bookingRequests = require("../models/booking_requests");
+const bookingRequests = require("../models/bookingRequests");
 const trip = require("../models/trip");
 const {
   BOOKING_REQUEST_CREATED,

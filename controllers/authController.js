@@ -1,5 +1,5 @@
 const registrationValidation = require("../validations/registrationValidation");
-const User = require("../models/user");
+const user = require("../models/user");
 const loginValidation = require("../validations/loginValidation");
 const { generateJWTToken } = require("../utils/JWTToken");
 const bcrypt = require("bcrypt");
@@ -24,7 +24,7 @@ const {
   LOGIN_SUCCESSFUL,
   MAIL_NOT_REGISTERED,
 } = require("../utils/message");
-const Profile = require("../models/userProfile");
+const profile = require("../models/userProfile");
 
 /**
  * @description It will register a user and validate its credentials.
@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
   const reqParams = req.body;
   registrationValidation(reqParams, res, async (validate) => {
     if (validate) {
-      const user = await User.findOne({
+      const user = await user.findOne({
         where: {
           email: reqParams.email,
         },
@@ -46,7 +46,7 @@ const registerUser = async (req, res) => {
           if (err) {
             errorResponseData(res, err.message, 500);
           } else {
-            const user = await User.create({
+            const user = await user.create({
               email: reqParams.email,
               password: hash,
               country_code: reqParams.country_code,
@@ -72,7 +72,7 @@ const logInUser = async (req, res) => {
   const reqParams = req.body;
   loginValidation(reqParams, res, async (validate) => {
     if (validate) {
-      const user = await User.findOne({
+      const user = await user.findOne({
         where: {
           email: reqParams.email,
         },
@@ -81,7 +81,7 @@ const logInUser = async (req, res) => {
       if (!user) {
         return errorResponseData(res, UNAUTHORIZED_USER, 401);
       } else {
-        const profile = await Profile.findOne({
+        const profile = await profile.findOne({
           where: {
             user_id: user.id,
           },
@@ -124,7 +124,7 @@ const logInUser = async (req, res) => {
 const forgotPassword = async (req, res) => {
   const reqParams = req.body;
 
-  const user = await User.findOne({
+  const user = await user.findOne({
     where: {
       email: reqParams.email,
     },
@@ -143,7 +143,7 @@ const forgotPassword = async (req, res) => {
       d.getMilliseconds()
     );
 
-    const setToken = await User.update(
+    const setToken = await user.update(
       { Token: token, token_expire: tokenExpire },
       { where: { email: reqParams.email } }
     );
@@ -193,7 +193,7 @@ const resetPassword = async (req, res) => {
 
   passwordValidation(reqParams, res, async (validate) => {
     if (validate) {
-      const user = await User.findOne({
+      const user = await user.findOne({
         where: {
           Token: token,
         },
@@ -207,7 +207,7 @@ const resetPassword = async (req, res) => {
             if (err) {
               return errorResponseWithoutData(res, err);
             } else {
-              const setData = await User.update(
+              const setData = await user.update(
                 { password: hash, Token: null, token_expire: null },
                 { where: { Token: token } }
               );

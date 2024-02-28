@@ -20,7 +20,7 @@ module.exports = {
       user_id: {
         type: DataTypes.INTEGER,
         references: {
-          model: "Users",
+          model: "users",
           key: "id",
         },
       },

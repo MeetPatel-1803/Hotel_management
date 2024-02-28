@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const User = require("./user");
-const Trip = require("./trip");
+const user = require("./user");
+const trip = require("./trip");
 
 const bookingRequests = sequelize.define("booking_requests", {
   id: {
@@ -13,14 +13,14 @@ const bookingRequests = sequelize.define("booking_requests", {
   user_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: User,
+      model: user,
       key: "id",
     },
   },
   trip_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: Trip,
+      model: trip,
       key: "id",
     },
   },

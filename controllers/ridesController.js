@@ -20,7 +20,7 @@ const {
 } = require("../utils/response");
 const addEditOfferRideValidation = require("../validations/offerRideValidation");
 const availableRideListValidation = require("../validations/availableRideListValidation");
-const bookingRequests = require("../models/booking_requests");
+const bookingRequests = require("../models/bookingRequests");
 const sequelize = require("../config/database");
 
 /**
