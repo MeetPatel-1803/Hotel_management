@@ -32,7 +32,7 @@ const profile = require("../models/userProfile");
  * @param {*} res
  */
 
-const registerUser = async (req, res) => {
+const register = async (req, res) => {
   const reqParams = req.body;
   registrationValidation(reqParams, res, async (validate) => {
     if (validate) {
@@ -68,7 +68,7 @@ const registerUser = async (req, res) => {
  * @param {*} res
  */
 
-const logInUser = async (req, res) => {
+const login = async (req, res) => {
   const reqParams = req.body;
   loginValidation(reqParams, res, async (validate) => {
     if (validate) {
@@ -227,8 +227,8 @@ const resetPassword = async (req, res) => {
 };
 
 module.exports = {
-  registerUser,
-  logInUser,
+  register,
+  login,
   forgotPassword,
   resetPassword,
 };

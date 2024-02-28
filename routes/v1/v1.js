@@ -3,8 +3,8 @@
 const router = require("express").Router();
 
 const {
-  registerUser,
-  logInUser,
+  register,
+  login,
   forgotPassword,
   resetPassword,
 } = require("../../controllers/authController");
@@ -30,8 +30,8 @@ const addEditRideRequest = require("../../controllers/bookingRequestController")
 /**
  * User
  */
-router.post("/registration", registerUser);
-router.post("/login", logInUser);
+router.post("/signup", register);
+router.post("/signin", login);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
@@ -69,9 +69,9 @@ router.delete(
 /**
  * Rides
  */
-router.post("/offer-trip", isAuthenticatedUser, addEditOfferRide);
+router.post("/offer-ride", isAuthenticatedUser, addEditOfferRide);
 router.get("/user-vehicles-list", isAuthenticatedUser, getUserVehiclesList);
-router.get("/find-trip", isAuthenticatedUser, availableRidesList);
+router.get("/find-ride", isAuthenticatedUser, availableRidesList);
 
 /**
  * booking requested ride
