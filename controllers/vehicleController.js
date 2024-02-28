@@ -1,5 +1,5 @@
 const addEditVehicleValidation = require("../validations/addEditVehicleValidation");
-const Vehicle = require("../models/userVehicle");
+const vehicle = require("../models/userVehicle");
 const {
   VEHICLE_ADDED,
   IMAGE_UPLOADED,
@@ -30,7 +30,7 @@ const addEditVehicle = async (req, res) => {
     addEditVehicleValidation(reqParams, res, async (validate) => {
       if (validate) {
         if (reqParams.id && reqParams.updateVehicle) {
-          const vehicleExist = await Vehicle.findOne({
+          const vehicleExist = await vehicle.findOne({
             where: { id: reqParams.id },
           });
 
@@ -42,34 +42,34 @@ const addEditVehicle = async (req, res) => {
             name: reqParams.name,
             type: reqParams.type,
             number: reqParams.number,
-            no_of_seats: reqParams.no_of_seats,
+            no_of_seats: reqParams.noOfSeats,
           };
 
-          await Vehicle.update(updateCondition, {
+          await vehicle.update(updateCondition, {
             where: { id: reqParams.id },
           });
 
-          const updatedVehicle = await Vehicle.findOne({
+          const updatedVehicle = await vehicle.findOne({
             where: { id: reqParams.id },
           });
 
           await transaction.commit();
-          responseSuccessWithMessage(
+          return responseSuccessWithMessage(
             res,
             { updatedVehicle: updatedVehicle },
             VEHICLE_UPDATED
           );
         } else {
-          const setData = await Vehicle.create({
+          const setData = await vehicle.create({
             user_id: req.id,
             name: reqParams.name,
             type: reqParams.type,
             number: reqParams.number,
-            no_of_seats: reqParams.no_of_seats,
+            no_of_seats: reqParams.noOfSeats,
           });
 
           await transaction.commit();
-          responseSuccessWithMessage(res, setData, VEHICLE_ADDED);
+          return responseSuccessWithMessage(res, setData, VEHICLE_ADDED);
         }
       }
     });
@@ -97,7 +97,7 @@ const addEditVehiclePicture = async (req, res) => {
         const key = `${process.env.FILE_PATH_VEHICLE}/${fileName}`;
         const expiresIn = 600;
 
-        const vehicleImage = await Vehicle.update(
+        const vehicleImage = await vehicle.update(
           {
             images: fileName,
           },
@@ -114,7 +114,7 @@ const addEditVehiclePicture = async (req, res) => {
           expiresIn
         );
 
-        responseSuccessWithMessage(res, { Image_url: url }, IMAGE_UPLOADED);
+        return responseSuccessWithMessage(res, { Image_url: url }, IMAGE_UPLOADED);
       }
     });
   } catch (error) {
@@ -132,7 +132,7 @@ const addEditVehiclePicture = async (req, res) => {
 const removeVehiclePicture = async (req, res) => {
   const reqParams = req.body;
   try {
-    const vehicleImage = await Vehicle.findOne({
+    const vehicleImage = await vehicle.findOne({
       where: { id: reqParams.id },
     });
 
@@ -140,7 +140,7 @@ const removeVehiclePicture = async (req, res) => {
       return errorResponseData(res, VEHICLE_IMAGE_NOT_FOUND, 404);
     }
 
-    await Vehicle.update(
+    await vehicle.update(
       { images: null },
       { where: { images: vehicleImage.images } }
     );
@@ -160,11 +160,11 @@ const removeVehiclePicture = async (req, res) => {
 
 const getUserVehiclesList = async (req, res) => {
   try {
-    const vehicleList = await Vehicle.findAll({
+    const vehicleList = await vehicle.findAll({
       where: { user_id: req.id },
     });
 
-    responseSuccessWithMessage(
+    return responseSuccessWithMessage(
       res,
       { vehicleList: vehicleList },
       VEHICLES_FETCHED_SUCCESSFULLY

@@ -1,6 +1,6 @@
 const { Sequelize } = require("sequelize");
-const bookingRequests = require("../models/booking_requests");
-const Trip = require("../models/trip");
+const bookingRequests = require("../models/bookingRequests");
+const trip = require("../models/trip");
 const {
   BOOKING_REQUEST_CREATED,
   SEATS_ARE_NOT_AVAILABLE,
@@ -26,12 +26,12 @@ const addEditRideRequest = async (req, res) => {
     const reqParams = req.body;
     addEditRideRequestValidation(reqParams, res, async (validate) => {
       if (validate) {
-        if (reqParams.trip_id && reqParams.is_Accepted) {
+        if (reqParams.trip_id && reqParams.is_accepted) {
           const filterCondition = {
             trip_id: reqParams.trip_id,
             user_id: reqParams.user_id,
             to_user_id: req.id,
-            trip_status: "Pending",
+            trip_status: "pending",
             no_of_passanger: reqParams.no_of_passanger,
           };
 
@@ -40,7 +40,7 @@ const addEditRideRequest = async (req, res) => {
           });
 
           if (existRequest) {
-            const checkAvailableSeats = await Trip.findOne({
+            const checkAvailableSeats = await trip.findOne({
               where: { id: reqParams.trip_id },
               attributes: ["available_seats"],
             });
@@ -58,7 +58,7 @@ const addEditRideRequest = async (req, res) => {
                 SEATS_ARE_NOT_AVAILABLE
               );
             } else {
-              const updateAvailableSeats = await Trip.update(
+              const updateAvailableSeats = await trip.update(
                 {
                   available_seats: Sequelize.literal(
                     `available_seats - ${reqParams.no_of_passanger}`
@@ -68,11 +68,11 @@ const addEditRideRequest = async (req, res) => {
               );
 
               const updateTripStatus = await bookingRequests.update(
-                { trip_status: "Accepted" },
+                { trip_status: "accepted" },
                 { where: filterCondition }
               );
 
-              const currentAvailableSeats = await Trip.findOne({
+              const currentAvailableSeats = await trip.findOne({
                 where: { id: reqParams.trip_id },
                 attributes: ["available_seats"],
               });
@@ -88,7 +88,7 @@ const addEditRideRequest = async (req, res) => {
             }
           }
         } else {
-          const userData = await Trip.findOne({
+          const userData = await trip.findOne({
             where: { id: reqParams.trip_id },
             attributes: ["user_id"],
           });

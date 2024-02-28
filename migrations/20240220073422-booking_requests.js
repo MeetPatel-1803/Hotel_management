@@ -20,7 +20,7 @@ module.exports = {
       user_id: {
         type: DataTypes.INTEGER,
         references: {
-          model: "Users",
+          model: "users",
           key: "id",
         },
       },
@@ -33,9 +33,9 @@ module.exports = {
       },
       trip_status: {
         type: DataTypes.ENUM,
-        values: ["Accepted", "Rejected", "Pending"],
+        values: ["accepted", "rejected", "pending"],
         allowNull: false,
-        defaultValue: "Pending",
+        defaultValue: "pending",
       },
     });
   },

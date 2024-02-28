@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const moment = require("moment");
 const { PAGINATION } = require("../constants/constants");
-const Trip = require("../models/trip");
+const trip = require("../models/trip");
 const {
   SOMETHING_WRONG,
   TRIP_CREATED,
@@ -20,7 +20,7 @@ const {
 } = require("../utils/response");
 const addEditOfferRideValidation = require("../validations/offerRideValidation");
 const availableRideListValidation = require("../validations/availableRideListValidation");
-const bookingRequests = require("../models/booking_requests");
+const bookingRequests = require("../models/bookingRequests");
 const sequelize = require("../config/database");
 
 /**
@@ -35,9 +35,9 @@ const addEditOfferRide = async (req, res) => {
 
     addEditOfferRideValidation(reqParams, res, async (validate) => {
       if (validate) {
-        if (reqParams.trip_id && reqParams.editOfferRide) {
-          const tripExist = await Trip.findOne({
-            where: { id: reqParams.trip_id },
+        if (reqParams.tripId && reqParams.editOfferRide) {
+          const tripExist = await trip.findOne({
+            where: { id: reqParams.tripId },
           });
 
           if (!tripExist) {
@@ -45,7 +45,7 @@ const addEditOfferRide = async (req, res) => {
           }
 
           const isTripStatusAccepted = await bookingRequests.findAll({
-            where: { trip_id: reqParams.trip_id, trip_status: "Accepted" },
+            where: { trip_id: reqParams.tripId, trip_status: "accepted" },
             attributes: ["trip_id", "trip_status"],
           });
 
@@ -64,12 +64,12 @@ const addEditOfferRide = async (req, res) => {
               vehicle_id: reqParams.vehicleId,
             };
 
-            await Trip.update(updateCondition, {
-              where: { id: reqParams.trip_id },
+            await trip.update(updateCondition, {
+              where: { id: reqParams.tripId },
             });
 
-            const updatedTrip = await Trip.findOne({
-              where: { id: reqParams.trip_id },
+            const updatedTrip = await trip.findOne({
+              where: { id: reqParams.tripId },
             });
 
             await transaction.commit();
@@ -77,23 +77,23 @@ const addEditOfferRide = async (req, res) => {
           } else {
             return errorResponseData(res, CANNOT_EDIT_A_TRIP);
           }
-        } else if (reqParams.trip_id && reqParams.cancelOfferRide) {
-          const tripExist = await Trip.findOne({
-            where: { id: reqParams.trip_id },
+        } else if (reqParams.tripId && reqParams.cancelOfferRide) {
+          const tripExist = await trip.findOne({
+            where: { id: reqParams.tripId },
           });
 
           if (!tripExist) {
             return errorResponseData(res, TRIP_NOT_FOUND);
           }
 
-          await Trip.destroy({
-            where: { id: reqParams.trip_id },
+          await trip.destroy({
+            where: { id: reqParams.tripId },
           });
 
           await transaction.commit();
           successResponseWithoutData(res, CANCEL_OFFERED_RIDE);
         } else {
-          const ride = await Trip.create({
+          const ride = await trip.create({
             user_id: req.id,
             source_address: reqParams.sourceAddress,
             source_lat: reqParams.sourceLat,
@@ -140,31 +140,31 @@ const availableRidesList = async (req, res) => {
           ? parseInt(reqParams.page)
           : PAGINATION.PAGE;
 
-        const per_page = reqParams.per_page
-          ? parseInt(reqParams.per_page)
+        const perPage = reqParams.perPage
+          ? parseInt(reqParams.perPage)
           : PAGINATION.PER_PAGE;
 
-        const pageItems = (page - 1) * per_page;
+        const pageItems = (page - 1) * perPage;
 
         let sortingOrder = [["created_at", "DESC"]];
 
-        if (reqParams.sort_by && reqParams.sort_type) {
-          sortingOrder = [[reqParams.sort_by, reqParams.sort_type]];
+        if (reqParams.sortBy && reqParams.sortType) {
+          sortingOrder = [[reqParams.sortBy, reqParams.sortType]];
         }
 
-        const listOfRides = await Trip.findAndCountAll({
+        const listOfRides = await trip.findAndCountAll({
           where: {
-            ...(reqParams.source_address && {
-              source_address: reqParams.source_address,
+            ...(reqParams.sourceAddress && {
+              source_address: reqParams.sourceAddress,
             }),
-            ...(reqParams.dest_address && {
-              dest_address: reqParams.dest_address,
+            ...(reqParams.destAddress && {
+              dest_address: reqParams.destAddress,
             }),
-            ...(reqParams.departure_date_from && reqParams.departure_date_to
+            ...(reqParams.departureDateFrom && reqParams.departureDateTo
               ? {
                   departure_date: {
-                    [Op.gte]: reqParams.departure_date_from,
-                    [Op.lte]: reqParams.departure_date_to,
+                    [Op.gte]: reqParams.departureDateFrom,
+                    [Op.lte]: reqParams.departureDateTo,
                   },
                 }
               : {
@@ -172,11 +172,11 @@ const availableRidesList = async (req, res) => {
                     [Op.gte]: moment(new Date()).format("YYYY-MM-DD"),
                   },
                 }),
-            ...(reqParams.departure_time_from && reqParams.departure_time_to
+            ...(reqParams.departureTimeFrom && reqParams.departureTimeTo
               ? {
                   departure_time: {
-                    [Op.gte]: reqParams.departure_time_from,
-                    [Op.lte]: reqParams.departure_time_to,
+                    [Op.gte]: reqParams.departureTimeFrom,
+                    [Op.lte]: reqParams.departureTimeTo,
                   },
                 }
               : {
@@ -184,24 +184,24 @@ const availableRidesList = async (req, res) => {
                     [Op.gte]: moment(new Date()).format("HH:MM:SS"),
                   },
                 }),
-            ...(reqParams.no_of_passanger
+            ...(reqParams.noOfPassanger
               ? {
                   available_seats: {
-                    [Op.gte]: parseInt(reqParams.no_of_passanger),
+                    [Op.gte]: parseInt(reqParams.noOfPassanger),
                   },
                 }
               : { available_seats: { [Op.gte]: 1 } }),
-            ...(reqParams.fare_min && reqParams.fare_max
+            ...(reqParams.fareMin && reqParams.fareMax
               ? {
                   fare: {
-                    [Op.gte]: reqParams.fare_min,
-                    [Op.lte]: reqParams.fare_max,
+                    [Op.gte]: reqParams.fareMin,
+                    [Op.lte]: reqParams.fareMax,
                   },
                 }
               : { fare: { [Op.gte]: 0, [Op.lte]: 500 } }),
           },
           order: sortingOrder,
-          limit: per_page,
+          limit: perPage,
           offset: pageItems,
         });
 
@@ -215,7 +215,7 @@ const availableRidesList = async (req, res) => {
           AVAILABLE_TRIPS_FETCHED,
           1,
           page,
-          per_page,
+          perPage,
           { totalCount: listOfRides.count }
         );
       }

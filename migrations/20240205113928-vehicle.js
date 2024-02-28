@@ -1,6 +1,6 @@
 "use strict";
 const { DataTypes } = require("sequelize");
-const User = require("../models/user");
+const user = require("../models/user");
 
 /**
  *  It will create table according to specified attributes.
@@ -19,7 +19,7 @@ module.exports = {
         type: DataTypes.INTEGER,
         allowNull: false,
         References: {
-          model: User,
+          model: user,
           key: "id",
         },
       },

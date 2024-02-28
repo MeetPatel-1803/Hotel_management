@@ -1,5 +1,5 @@
 const profileValidation = require("../validations/userProfileValidation");
-const Profile = require("../models/userProfile");
+const profile = require("../models/userProfile");
 const { randomDigits } = require("../utils/helper");
 const {
   PROFILE_FORM_SUBMITTED,
@@ -25,7 +25,7 @@ const imageValidation = require("../validations/imageValidation");
  */
 const getProfile = async (req, res) => {
   try {
-    const profile = await Profile.findOne({
+    const profile = await profile.findOne({
       where: {
         user_id: req.id,
       },
@@ -54,7 +54,7 @@ const addEditProfile = async (req, res) => {
     profileValidation(reqParams, res, async (validate) => {
       if (validate) {
         if (reqParams.updateProfile) {
-          const profileExist = await Profile.findOne({
+          const profileExist = await profile.findOne({
             where: { user_id: req.id },
           });
 
@@ -71,11 +71,11 @@ const addEditProfile = async (req, res) => {
             date_of_birth: reqParams.date_of_birth,
           };
 
-          await Profile.update(updateCondition, {
+          await profile.update(updateCondition, {
             where: { user_id: req.id },
           });
 
-          const updatedProfile = await Profile.findOne({
+          const updatedProfile = await profile.findOne({
             where: { user_id: req.id },
           });
 
@@ -85,7 +85,7 @@ const addEditProfile = async (req, res) => {
             PROFILE_UPDATED
           );
         } else {
-          const setData = await Profile.create({
+          const setData = await profile.create({
             user_id: req.id,
             first_name: reqParams.first_name,
             last_name: reqParams.last_name,
@@ -126,7 +126,7 @@ const addEditProfilePicture = async (req, res) => {
         const key = `${process.env.FILE_PATH_PROFILE}/${fileName}`;
         const expiresIn = 600;
 
-        const profileImage = await Profile.update(
+        const profileImage = await profile.update(
           { profile_picture: fileName },
           { where: { id: reqParams.id } }
         );
@@ -158,7 +158,7 @@ const addEditProfilePicture = async (req, res) => {
 const removeProfilePicture = async (req, res) => {
   const reqParams = req.body;
   try {
-    const profileImage = await Profile.findOne({
+    const profileImage = await profile.findOne({
       where: { id: reqParams.id },
     });
 
@@ -166,7 +166,7 @@ const removeProfilePicture = async (req, res) => {
       return errorResponseData(res, PROFILE_IMAGE_NOT_FOUND, 404);
     }
 
-    await Profile.update(
+    await profile.update(
       { profile_picture: null },
       { where: { profile_picture: profileImage.profile_picture } }
     );

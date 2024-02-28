@@ -31,7 +31,7 @@ const addEditVehicleValidation = (req, res, callback) => {
     number: Joi.string()
       .required()
       .pattern(/^[A-Z]{2}[ -]?[0-9]{2}[ -]?[A-Z]{1,2}[ -]?[0-9]{4}$/),
-    no_of_seats: Joi.number().required(),
+    noOfSeats: Joi.number().required(),
   });
   const { error } = schema.validate(req);
   if (error) {

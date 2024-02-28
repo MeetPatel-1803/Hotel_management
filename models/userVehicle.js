@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const User = require("./user");
+const user = require("./user");
 
 const Vehicle = sequelize.define("vehicles", {
   id: {
@@ -13,7 +13,7 @@ const Vehicle = sequelize.define("vehicles", {
     type: DataTypes.INTEGER,
     allowNull: false,
     References: {
-      model: User,
+      model: user,
       key: "id",
     },
   },
