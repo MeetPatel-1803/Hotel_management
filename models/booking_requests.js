@@ -36,9 +36,9 @@ const bookingRequests = sequelize.define("booking_requests", {
   },
   trip_status: {
     type: DataTypes.ENUM,
-    values: ["Accepted", "Rejected", "Pending"],
+    values: ["accepted", "rejected", "pending"],
     allowNull: false,
-    defaultValue: "Pending",
+    defaultValue: "pending",
   },
 });
 
