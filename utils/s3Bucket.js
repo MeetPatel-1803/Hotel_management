@@ -48,4 +48,15 @@ const removeOldImage = (AWS_BUCKET_NAME, FILE_PATH, res) => {
   );
 };
 
-module.exports = { generatePreSignedUrl, removeOldImage };
+const fetchPreSignedUrl = (file) => {
+  try {
+    return s3.getSignedUrl("getObject", {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: `${process.env.FILE_PATH_PROFILE}/${file}`,
+    });
+  } catch (error) {
+    console.log(error, "error: ???");
+  }
+};
+
+module.exports = { generatePreSignedUrl, removeOldImage, fetchPreSignedUrl };

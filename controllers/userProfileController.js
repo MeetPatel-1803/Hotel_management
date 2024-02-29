@@ -15,7 +15,11 @@ const {
   errorResponseWithoutData,
   errorResponseData,
 } = require("../utils/response");
-const { generatePreSignedUrl, removeOldImage } = require("../utils/s3Bucket");
+const {
+  generatePreSignedUrl,
+  removeOldImage,
+  fetchPreSignedUrl,
+} = require("../utils/s3Bucket");
 const imageValidation = require("../validations/imageValidation");
 
 /**
@@ -25,17 +29,25 @@ const imageValidation = require("../validations/imageValidation");
  */
 const getProfile = async (req, res) => {
   try {
-    const profile = await profile.findOne({
+    const profileDetail = await profile.findOne({
       where: {
         user_id: req.id,
       },
     });
 
-    if (!profile) {
+    if (!profileDetail) {
       return errorResponseData(res, PROFILE_NOT_FOUND);
     }
 
-    responseSuccessWithMessage(res, profile, USER_PROFILE_FETCHED, (code = 1));
+    const file = profileDetail.profile_picture;
+    const imageUrl = fetchPreSignedUrl(file);
+
+    responseSuccessWithMessage(
+      res,
+      { profileDetail, imageUrl },
+      USER_PROFILE_FETCHED,
+      (code = 1)
+    );
   } catch (error) {
     return errorResponseData(res, error.message);
   }
