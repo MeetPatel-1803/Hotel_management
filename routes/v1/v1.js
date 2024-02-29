@@ -33,6 +33,7 @@ router.post("/signup", register);
 router.post("/signin", login);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+router.post("/change-password", isAuthenticatedUser, changePassword);
 
 /**
  * Profile
@@ -49,23 +50,22 @@ router.delete(
   isAuthenticatedUser,
   removeProfilePicture
 );
-router.post("/change-password", isAuthenticatedUser, changePassword);
 
 /**
  * Vehicle
  */
-router.post("/vehicle-informaton", isAuthenticatedUser, addEditVehicle);
+router.post("/add-edit-vehicle", isAuthenticatedUser, addEditVehicle);
 
 /**
  * Rides
  */
-router.post("/offer-ride", isAuthenticatedUser, addEditOfferRide);
+router.post("/add-edit-offer-ride", isAuthenticatedUser, addEditOfferRide);
 router.get("/user-vehicles-list", isAuthenticatedUser, getUserVehiclesList);
-router.get("/find-ride", isAuthenticatedUser, availableRidesList);
+router.get("/available-rides", isAuthenticatedUser, availableRidesList);
 
 /**
  * booking requested ride
  */
-router.post("/ride-booking", isAuthenticatedUser, addEditRideRequest);
+router.post("/add-edit-ride-request", isAuthenticatedUser, addEditRideRequest);
 
 module.exports = router;
