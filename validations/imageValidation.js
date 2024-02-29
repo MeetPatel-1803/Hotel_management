@@ -13,7 +13,7 @@ const { IMAGE_MIMETYPE } = require("../constants/constants");
 const imageValidation = (req, res, callback) => {
   const pattern = new RegExp(`/^[A-Za-z0-9-_]+\/${IMAGE_MIMETYPE.join("|")}$/`);
   const schema = Joi.object({
-    id: Joi.number(),
+    profileId: Joi.number(),
     mimetype: Joi.string().pattern(pattern),
   });
   const { error } = schema.validate(req);

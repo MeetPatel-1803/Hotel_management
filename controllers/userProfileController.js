@@ -130,6 +130,16 @@ const addEditProfilePicture = async (req, res) => {
   try {
     imageValidation(reqParams, res, async (validate) => {
       if (validate) {
+        const profileDetail = await profile.findOne({
+          where: { id: reqParams.profileId },
+          attributes: ["profile_picture"],
+        });
+
+        if (profileDetail.profile_picture != null) {
+          const file = `${process.env.FILE_PATH_PROFILE}/${profileDetail.profile_picture}`;
+          await removeOldImage(process.env.AWS_BUCKET_NAME, file, res);
+        }
+
         const imgExtension = reqParams.mimetype.split("/")[1];
         const imgFileName = reqParams.mimetype.split("/")[0];
         const fileName = `${Date.now()}${randomDigits(
@@ -140,7 +150,7 @@ const addEditProfilePicture = async (req, res) => {
 
         const profileImage = await profile.update(
           { profile_picture: fileName },
-          { where: { id: reqParams.id } }
+          { where: { id: reqParams.profileId } }
         );
 
         if (!profileImage) {
@@ -152,11 +162,15 @@ const addEditProfilePicture = async (req, res) => {
           key,
           expiresIn
         );
-        responseSuccessWithMessage(res, { Profile_image: url }, IMAGE_UPLOADED);
+        return responseSuccessWithMessage(
+          res,
+          { Profile_image: url },
+          IMAGE_UPLOADED
+        );
       }
     });
   } catch (error) {
-    return errorResponseData(res, error, 400);
+    return errorResponseData(res, error.message);
   }
 };
 
