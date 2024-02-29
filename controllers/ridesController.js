@@ -8,7 +8,7 @@ const {
   AVAILABLE_RIDES_FETCHED,
   NO_RIDES_FOUND,
   RIDE_NOT_FOUND,
-  CANNOT_EDIT_A_RIDE,
+  CANNOT_UPDATE_A_RIDE,
   CANCEL_OFFERED_RIDE,
   RIDE_UPDATED,
 } = require("../utils/message");
@@ -82,7 +82,7 @@ const addEditOfferRide = async (req, res) => {
               await transaction.commit();
               return responseSuccessWithMessage(res, updatedTrip, RIDE_UPDATED);
             } else {
-              return errorResponseData(res, CANNOT_EDIT_A_RIDE);
+              return errorResponseData(res, CANNOT_UPDATE_A_RIDE);
             }
           
         } else {
