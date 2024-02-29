@@ -65,9 +65,9 @@ const addEditProfile = async (req, res) => {
 
     profileValidation(reqParams, res, async (validate) => {
       if (validate) {
-        if (reqParams.updateProfile) {
+        if (reqParams.profileId) {
           const profileExist = await profile.findOne({
-            where: { user_id: req.id },
+            where: { id: reqParams.profileId },
           });
 
           if (!profileExist) {
@@ -75,20 +75,20 @@ const addEditProfile = async (req, res) => {
           }
 
           const updateCondition = {
-            first_name: reqParams.first_name,
-            last_name: reqParams.last_name,
-            bio: reqParams.bio,
-            address: reqParams.address,
-            gender: reqParams.gender,
-            date_of_birth: reqParams.date_of_birth,
+            first_name: reqParams?.first_name,
+            last_name: reqParams?.last_name,
+            bio: reqParams?.bio,
+            address: reqParams?.address,
+            gender: reqParams?.gender,
+            date_of_birth: reqParams?.date_of_birth,
           };
 
           await profile.update(updateCondition, {
-            where: { user_id: req.id },
+            where: { id: reqParams.profileId },
           });
 
           const updatedProfile = await profile.findOne({
-            where: { user_id: req.id },
+            where: { id: reqParams.profileId },
           });
 
           responseSuccessWithMessage(
@@ -99,10 +99,10 @@ const addEditProfile = async (req, res) => {
         } else {
           const setData = await profile.create({
             user_id: req.id,
-            first_name: reqParams.first_name,
-            last_name: reqParams.last_name,
-            date_of_birth: reqParams.date_of_birth,
-            gender: reqParams.gender,
+            first_name: reqParams?.first_name,
+            last_name: reqParams?.last_name,
+            date_of_birth: reqParams?.date_of_birth,
+            gender: reqParams?.gender,
           });
 
           if (!setData) {
