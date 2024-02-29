@@ -34,7 +34,7 @@ const bookingRequests = sequelize.define("booking_requests", {
     allowNull: false,
     defaultValue: 0,
   },
-  trip_status: {
+  status: {
     type: DataTypes.ENUM,
     values: ["accepted", "rejected", "pending"],
     allowNull: false,

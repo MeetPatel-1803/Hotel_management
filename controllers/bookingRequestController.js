@@ -32,7 +32,7 @@ const addEditRideRequest = async (req, res) => {
             id: reqParams.booking_request_id,
             user_id: reqParams.user_id,
             to_user_id: req.id,
-            trip_status: "pending",
+            status: "pending",
             no_of_passanger: reqParams.no_of_passanger,
           };
 
@@ -67,7 +67,7 @@ const addEditRideRequest = async (req, res) => {
               );
 
               await bookingRequests.update(
-                { trip_status: "accepted" },
+                { status: "accepted" },
                 { where: { id: reqParams.booking_request_id } }
               );
 

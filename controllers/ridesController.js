@@ -52,8 +52,8 @@ const addEditOfferRide = async (req, res) => {
             return successResponseWithoutData(res, CANCEL_OFFERED_RIDE);
           } 
             const isTripStatusAccepted = await bookingRequests.findAll({
-              where: { trip_id: reqParams.tripId, trip_status: "accepted" },
-              attributes: ["trip_id", "trip_status"],
+              where: { trip_id: reqParams.tripId, status: "accepted" },
+              attributes: ["trip_id", "status"],
             });
 
             if (isTripStatusAccepted.length == 0) {
