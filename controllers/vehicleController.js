@@ -2,7 +2,6 @@ const addEditVehicleValidation = require("../validations/addEditVehicleValidatio
 const vehicle = require("../models/userVehicle");
 const {
   VEHICLE_ADDED,
-  IMAGE_UPLOADED,
   VEHICLE_UPDATED,
   VEHICLE_NOT_FOUND,
   VEHICLE_IMAGE_NOT_FOUND,
@@ -15,7 +14,6 @@ const {
 const sequelize = require("../config/database");
 const { randomDigits } = require("../utils/helper");
 const { generatePreSignedUrl, removeOldImage } = require("../utils/s3Bucket");
-const imageValidation = require("../validations/imageValidation");
 
 /**
  * @description This function will add user vehicle and can update also.
@@ -33,9 +31,33 @@ const addEditVehicle = async (req, res) => {
           const vehicleExist = await vehicle.findOne({
             where: { id: reqParams.vehicleId },
           });
-
           if (!vehicleExist) {
             return errorResponseData(res, VEHICLE_NOT_FOUND);
+          }
+
+          let url;
+          if (reqParams.mimetype) {
+            const file = `${process.env.FILE_PATH_VEHICLE}/${vehicleExist.images}`;
+            removeOldImage(process.env.AWS_BUCKET_NAME, file, res);
+
+            const imgExtension = reqParams?.mimetype.split("/")[1];
+            const imgFileName = reqParams?.mimetype.split("/")[0];
+            const fileName = `${Date.now()}${randomDigits(
+              4
+            )}-${imgFileName}.${imgExtension}`;
+            const key = `${process.env.FILE_PATH_VEHICLE}/${fileName}`;
+            const expiresIn = 600;
+
+            await vehicle.update(
+              { images: fileName },
+              { where: { id: reqParams.vehicleId } }
+            );
+
+            url = generatePreSignedUrl(
+              process.env.AWS_BUCKET_NAME,
+              key,
+              expiresIn
+            );
           }
 
           const updateCondition = {
@@ -56,10 +78,43 @@ const addEditVehicle = async (req, res) => {
           await transaction.commit();
           return responseSuccessWithMessage(
             res,
-            { updatedVehicle: updatedVehicle },
+            { updatedVehicle: updatedVehicle, image_url: url },
             VEHICLE_UPDATED
           );
         } else {
+          let url;
+          if (reqParams.mimetype) {
+            const imgExtension = reqParams?.mimetype.split("/")[1];
+            const imgFileName = reqParams?.mimetype.split("/")[0];
+            const fileName = `${Date.now()}${randomDigits(
+              4
+            )}-${imgFileName}.${imgExtension}`;
+
+            const key = `${process.env.FILE_PATH_VEHICLE}/${fileName}`;
+            const expiresIn = 600;
+
+            url = generatePreSignedUrl(
+              process.env.AWS_BUCKET_NAME,
+              key,
+              expiresIn
+            );
+
+            const setData = await vehicle.create({
+              user_id: req.id,
+              name: reqParams.name,
+              type: reqParams.type,
+              number: reqParams.number,
+              no_of_seats: reqParams.noOfSeats,
+              images: fileName,
+            });
+
+            await transaction.commit();
+            return responseSuccessWithMessage(
+              res,
+              { setData, image_url: url },
+              VEHICLE_ADDED
+            );
+          }
           const setData = await vehicle.create({
             user_id: req.id,
             name: reqParams.name,
@@ -76,49 +131,6 @@ const addEditVehicle = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     return errorResponseData(res, error.message);
-  }
-};
-
-/**
- * @description This function will upload image of user vehicle on s3 bucket.
- * @param {*} req
- * @param {*} res
- */
-const addEditVehiclePicture = async (req, res) => {
-  try {
-    const reqParams = req.body;
-    imageValidation(reqParams, res, async (validate) => {
-      if (validate) {
-        const imgExtension = reqParams.mimetype.split("/")[1];
-        const imgFileName = reqParams.mimetype.split("/")[0];
-        const fileName = `${Date.now()}${randomDigits(
-          4
-        )}-${imgFileName}.${imgExtension}`;
-        const key = `${process.env.FILE_PATH_VEHICLE}/${fileName}`;
-        const expiresIn = 600;
-
-        const vehicleImage = await vehicle.update(
-          {
-            images: fileName,
-          },
-          { where: { id: reqParams.id } }
-        );
-
-        if (!vehicleImage) {
-          return errorResponseData(res, VEHICLE_NOT_FOUND, 400);
-        }
-
-        const url = generatePreSignedUrl(
-          process.env.AWS_BUCKET_NAME,
-          key,
-          expiresIn
-        );
-
-        return responseSuccessWithMessage(res, { Image_url: url }, IMAGE_UPLOADED);
-      }
-    });
-  } catch (error) {
-    return errorResponseData(res, error.message, 400);
   }
 };
 
@@ -176,7 +188,6 @@ const getUserVehiclesList = async (req, res) => {
 
 module.exports = {
   addEditVehicle,
-  addEditVehiclePicture,
   removeVehiclePicture,
   getUserVehiclesList,
 };

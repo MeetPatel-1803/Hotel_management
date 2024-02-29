@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const { errorResponseData } = require("../utils/response");
+const { IMAGE_MIMETYPE } = require("../constants/constants");
 
 /**
  * @description It will validate number plate
@@ -10,6 +11,7 @@ const { errorResponseData } = require("../utils/response");
  */
 
 const addEditVehicleValidation = (req, res, callback) => {
+  const pattern = new RegExp(`/^[A-Za-z0-9-_]+\/${IMAGE_MIMETYPE.join("|")}$/`);
   const schema = Joi.object({
     vehicleId: Joi.number(),
     name: Joi.string().required(),
@@ -31,6 +33,7 @@ const addEditVehicleValidation = (req, res, callback) => {
       .required()
       .pattern(/^[A-Z]{2}[ -]?[0-9]{2}[ -]?[A-Z]{1,2}[ -]?[0-9]{4}$/),
     noOfSeats: Joi.number().required(),
+    mimetype: Joi.string().pattern(pattern),
   });
   const { error } = schema.validate(req);
   if (error) {
