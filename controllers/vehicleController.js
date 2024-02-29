@@ -29,9 +29,9 @@ const addEditVehicle = async (req, res) => {
 
     addEditVehicleValidation(reqParams, res, async (validate) => {
       if (validate) {
-        if (reqParams.id && reqParams.updateVehicle) {
+        if (reqParams.vehicleId) {
           const vehicleExist = await vehicle.findOne({
-            where: { id: reqParams.id },
+            where: { id: reqParams.vehicleId },
           });
 
           if (!vehicleExist) {
@@ -39,18 +39,18 @@ const addEditVehicle = async (req, res) => {
           }
 
           const updateCondition = {
-            name: reqParams.name,
-            type: reqParams.type,
-            number: reqParams.number,
-            no_of_seats: reqParams.noOfSeats,
+            name: reqParams?.name,
+            type: reqParams?.type,
+            number: reqParams?.number,
+            no_of_seats: reqParams?.noOfSeats,
           };
 
           await vehicle.update(updateCondition, {
-            where: { id: reqParams.id },
+            where: { id: reqParams.vehicleId },
           });
 
           const updatedVehicle = await vehicle.findOne({
-            where: { id: reqParams.id },
+            where: { id: reqParams.vehicleId },
           });
 
           await transaction.commit();

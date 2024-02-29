@@ -11,8 +11,7 @@ const { errorResponseData } = require("../utils/response");
 
 const addEditVehicleValidation = (req, res, callback) => {
   const schema = Joi.object({
-    id: Joi.number(),
-    updateVehicle: Joi.boolean(),
+    vehicleId: Joi.number(),
     name: Joi.string().required(),
     type: Joi.string()
       .valid(
