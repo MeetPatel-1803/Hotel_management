@@ -18,7 +18,6 @@ const {
 const { isAuthenticatedUser } = require("../../middleware/auth");
 const {
   addEditVehicle,
-  removeVehiclePicture,
   getUserVehiclesList,
 } = require("../../controllers/vehicleController");
 const {
@@ -56,11 +55,6 @@ router.post("/change-password", isAuthenticatedUser, changePassword);
  * Vehicle
  */
 router.post("/vehicle-informaton", isAuthenticatedUser, addEditVehicle);
-router.delete(
-  "/remove-vehicle-picture",
-  isAuthenticatedUser,
-  removeVehiclePicture
-);
 
 /**
  * Rides

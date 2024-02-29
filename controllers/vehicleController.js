@@ -135,36 +135,6 @@ const addEditVehicle = async (req, res) => {
 };
 
 /**
- * @description This function will delete uploaded image from database and s3 Bucket.
- * @param {*} req
- * @param {*} res
- * @returns
- */
-
-const removeVehiclePicture = async (req, res) => {
-  const reqParams = req.body;
-  try {
-    const vehicleImage = await vehicle.findOne({
-      where: { id: reqParams.id },
-    });
-
-    if (!vehicleImage) {
-      return errorResponseData(res, VEHICLE_IMAGE_NOT_FOUND, 404);
-    }
-
-    await vehicle.update(
-      { images: null },
-      { where: { images: vehicleImage.images } }
-    );
-
-    const file = `${process.env.FILE_PATH_VEHICLE}/${vehicleImage.images}`;
-    removeOldImage(process.env.AWS_BUCKET_NAME, file, res);
-  } catch (error) {
-    return errorResponseData(res, error.message, 400);
-  }
-};
-
-/**
  * @description This function will collect all vehicles based on user id.
  * @param {*} req
  * @param {*} res
@@ -178,7 +148,7 @@ const getUserVehiclesList = async (req, res) => {
 
     return responseSuccessWithMessage(
       res,
-      { vehicleList: vehicleList },
+      { vehicleList },
       VEHICLES_FETCHED_SUCCESSFULLY
     );
   } catch (error) {
@@ -188,6 +158,5 @@ const getUserVehiclesList = async (req, res) => {
 
 module.exports = {
   addEditVehicle,
-  removeVehiclePicture,
   getUserVehiclesList,
 };
