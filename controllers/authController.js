@@ -90,29 +90,33 @@ const login = async (req, res) => {
           },
         });
 
-        bcrypt.compare(reqParams.password, userDetail.password, (err, isValid) => {
-          if (err) {
-            return errorResponseWithoutData(res, err);
-          } else if (!isValid) {
-            return errorResponseData(res, INCORRECT_PASSWORD, 400);
-          } else {
-            const tokenData = generateJWTToken(userDetail.id, res);
-
-            if (profileData) {
-              responseSuccessWithMessage(
-                res,
-                { isProfileCreated: true, token: tokenData.token },
-                LOGIN_SUCCESSFUL
-              );
+        bcrypt.compare(
+          reqParams.password,
+          userDetail.password,
+          (err, isValid) => {
+            if (err) {
+              return errorResponseWithoutData(res, err);
+            } else if (!isValid) {
+              return errorResponseData(res, INCORRECT_PASSWORD, 400);
             } else {
-              responseSuccessWithMessage(
-                res,
-                { isProfileCreated: false, token: tokenData.token },
-                LOGIN_SUCCESSFUL
-              );
+              const token = generateJWTToken(userDetail.id, res);
+
+              if (profileData) {
+                responseSuccessWithMessage(
+                  res,
+                  { isProfileCreated: true, token: token },
+                  LOGIN_SUCCESSFUL
+                );
+              } else {
+                responseSuccessWithMessage(
+                  res,
+                  { isProfileCreated: false, token: token },
+                  LOGIN_SUCCESSFUL
+                );
+              }
             }
           }
-        });
+        );
       }
     }
   });
@@ -166,7 +170,7 @@ const forgotPassword = async (req, res) => {
         },
       });
       try {
-        await transporter.sendMail({  
+        await transporter.sendMail({
           from: process.env.MAIL_USER,
           to: reqParams.email,
           subject: "RESET PASSWORD",
