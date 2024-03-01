@@ -26,18 +26,9 @@ const addEditRideRequest = async (req, res) => {
     const reqParams = req.body;
     addEditRideRequestValidation(reqParams, res, async (validate) => {
       if (validate) {
-        if (reqParams.booking_request_id && reqParams.is_accepted) {
-          //review
-          const filterCondition = {
-            id: reqParams.booking_request_id,
-            user_id: reqParams.user_id,
-            to_user_id: req.id,
-            status: "pending",
-            no_of_passanger: reqParams.no_of_passanger,
-          };
-
+        if (reqParams.booking_request_id) {
           const existRequest = await bookingRequests.findOne({
-            where: filterCondition,
+            where: { id: reqParams.booking_request_id },
           });
 
           if (existRequest) {
