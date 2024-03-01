@@ -196,7 +196,6 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   const reqParams = req.body;
   const token = reqParams.token;
-  const d = new Date();
 
   passwordValidation(reqParams, res, async (validate) => {
     if (validate) {
@@ -206,7 +205,7 @@ const resetPassword = async (req, res) => {
         },
       });
 
-      if (userDetail && userDetail.token_expire < d) {
+      if (userDetail && userDetail.token_expire < new Date()) {
         return errorResponseWithoutData(res, TOKEN_EXPIRED, 401);
       } else {
         if (userDetail) {
@@ -261,12 +260,12 @@ const changePassword = async (req, res) => {
                 if (err) {
                   return errorResponseData(res, err);
                 } else {
-                  const setData = await user.update(
+                  const updateUserPassword = await user.update(
                     { password: hash },
                     { where: { id: req.id } }
                   );
 
-                  if (!setData) {
+                  if (!updateUserPassword) {
                     return errorResponseWithoutData(res, SOMETHING_WRONG);
                   }
                   successResponseWithoutData(res, PASSWORD_UPDATED);
