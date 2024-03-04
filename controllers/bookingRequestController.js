@@ -5,11 +5,13 @@ const {
   BOOKING_REQUEST_CREATED,
   SEATS_ARE_NOT_AVAILABLE,
   RIDE_IS_FULL,
-  BOOKING_REQUEST_ACCEPTED,
+  CANNOT_UPDATE_A_RIDE,
+  RIDE_UPDATED,
 } = require("../utils/message");
 const {
   errorResponseData,
   responseSuccessWithMessage,
+  successResponseWithoutData,
 } = require("../utils/response");
 const addEditRideRequestValidation = require("../validations/addEditRideRequestValidation");
 const sequelize = require("../config/database");
@@ -28,55 +30,63 @@ const addEditRideRequest = async (req, res) => {
       if (validate) {
         if (reqParams.booking_request_id) {
           const existRequest = await bookingRequests.findOne({
-            where: { id: reqParams.booking_request_id },
+            where: { id: reqParams.booking_request_id, status: "pending" },
           });
 
-          if (existRequest) {
-            const checkAvailableSeats = await trip.findOne({
-              where: { id: reqParams.trip_id },
-              attributes: ["available_seats"],
-            });
-
-            if (checkAvailableSeats.available_seats == 0) {
-              return responseSuccessWithMessage(res, null, RIDE_IS_FULL);
-            } else if (
-              checkAvailableSeats.available_seats < reqParams.no_of_passanger
-            ) {
-              return responseSuccessWithMessage(
-                res,
-                { availableSeats: checkAvailableSeats.available_seats },
-                SEATS_ARE_NOT_AVAILABLE
-              );
-            } else {
-              await trip.update(
-                {
-                  available_seats: Sequelize.literal(
-                    `available_seats - ${reqParams.no_of_passanger}`
-                  ),
-                },
-                { where: { id: reqParams.trip_id } }
-              );
-
-              await bookingRequests.update(
-                { status: "accepted" },
-                { where: { id: reqParams.booking_request_id } }
-              );
-
-              const currentAvailableSeats = await trip.findOne({
-                where: { id: reqParams.trip_id },
-                attributes: ["available_seats"],
-              });
-
-              await transaction.commit();
-              return responseSuccessWithMessage(
-                res,
-                {
-                  currentAvailableSeats: currentAvailableSeats.available_seats,
-                },
-                BOOKING_REQUEST_ACCEPTED
-              );
-            }
+          if (!existRequest) {
+            return successResponseWithoutData(res, CANNOT_UPDATE_A_RIDE);
           }
+        }
+
+        const checkAvailableSeats = await trip.findOne({
+          where: { id: reqParams.trip_id },
+          attributes: ["available_seats"],
+        });
+
+        if (checkAvailableSeats.available_seats == 0) {
+          return responseSuccessWithMessage(res, null, RIDE_IS_FULL);
+        } else if (
+          checkAvailableSeats.available_seats < reqParams.no_of_passanger
+        ) {
+          return responseSuccessWithMessage(
+            res,
+            { availableSeats: checkAvailableSeats.available_seats },
+            SEATS_ARE_NOT_AVAILABLE
+          );
+        }
+
+        await trip.update(
+          {
+            available_seats: Sequelize.literal(
+              `available_seats - ${reqParams.no_of_passanger}`
+            ),
+          },
+          { where: { id: reqParams.trip_id } }
+        );
+
+        const currentAvailableSeats = await trip.findOne({
+          where: { id: reqParams.trip_id },
+          attributes: ["available_seats"],
+        });
+
+        if (reqParams.booking_request_id) {
+          await bookingRequests.update(
+            {
+              no_of_passanger: Sequelize.literal(
+                `no_of_passanger + ${reqParams.no_of_passanger}`
+              ),
+            },
+            { where: { id: reqParams.booking_request_id } }
+          );
+
+          await transaction.commit();
+          return responseSuccessWithMessage(
+            res,
+            {
+              currentAvailableSeats: currentAvailableSeats.available_seats,
+            },
+            RIDE_UPDATED
+          );
         } else {
           const tripDetail = await trip.findOne({
             where: { id: reqParams.trip_id },
@@ -93,7 +103,10 @@ const addEditRideRequest = async (req, res) => {
           await transaction.commit();
           return responseSuccessWithMessage(
             res,
-            { bookingRequest: bookingRequest },
+            {
+              bookingRequest: bookingRequest,
+              currentAvailableSeats: currentAvailableSeats.available_seats,
+            },
             BOOKING_REQUEST_CREATED
           );
         }
