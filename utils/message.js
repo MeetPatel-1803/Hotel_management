@@ -36,6 +36,8 @@ const responseMessages = {
   RIDE_UPDATED: "Ride updated successfully",
   CANCEL_OFFERED_RIDE: "You cancelled your offered ride",
   INCORRECT_OLD_PASSWORD: "Incorrect old password",
+  RIDE_STATUS_ACCEPTED: "Your ride has been accepted",
+  RIDE_STATUS_REJECTED: "Your ride has been rejected",
 };
 
 module.exports = responseMessages;

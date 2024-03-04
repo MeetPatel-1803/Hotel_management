@@ -24,7 +24,10 @@ const {
   addEditOfferRide,
   availableRidesList,
 } = require("../../controllers/ridesController");
-const addEditRideRequest = require("../../controllers/bookingRequestController");
+const {
+  addEditRideRequest,
+  updateStatusOfRideRequest,
+} = require("../../controllers/bookingRequestController");
 
 /**
  * User
@@ -67,5 +70,10 @@ router.get("/available-rides", isAuthenticatedUser, availableRidesList);
  * booking requested ride
  */
 router.post("/add-edit-ride-request", isAuthenticatedUser, addEditRideRequest);
+router.post(
+  "/update-ride-status",
+  isAuthenticatedUser,
+  updateStatusOfRideRequest
+);
 
 module.exports = router;
