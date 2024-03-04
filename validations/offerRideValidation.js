@@ -10,9 +10,11 @@ const { MAX_NO_OF_PASSANGER } = require("../constants/constants");
  * @returns
  */
 
-const offerRideValidation = (req, res, callback) => {
+const addEditOfferRideValidation = (req, res, callback) => {
   const schema = Joi.object({
     vehicleId: Joi.number(),
+    trip_id:Joi.number(),
+    cancelOfferRide:Joi.boolean(),
     sourceAddress: Joi.string().trim().required(),
     sourceLat: Joi.number().min(-90).max(90).precision(2).required(),
     sourceLong: Joi.number().min(-180).max(180).precision(2).required(),
@@ -20,7 +22,7 @@ const offerRideValidation = (req, res, callback) => {
     destLat: Joi.number().min(-90).max(90).precision(2).required(),
     destLong: Joi.number().min(-180).max(180).precision(2).required(),
     departureDate: Joi.date().iso(),
-    departureTime: Joi.string().pattern(/^([01]?[0-9])\:([0-5][0-9])$/i),
+    departureTime: Joi.string().pattern(/^([012]?[0-9])\:([0-5][0-9])$/i),
     availableSeats: Joi.number().required().max(MAX_NO_OF_PASSANGER),
     fare: Joi.number().min(0).precision(2).required(),
   });
@@ -32,4 +34,4 @@ const offerRideValidation = (req, res, callback) => {
     return callback(true);
   }
 };
-module.exports = offerRideValidation;
+module.exports = addEditOfferRideValidation;

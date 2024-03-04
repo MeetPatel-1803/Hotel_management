@@ -22,10 +22,24 @@ const responseMessages = {
   VEHICLE_IMAGE_NOT_FOUND: "Vehicle image not found",
   PROFILE_NOT_FOUND: "Profile not found",
   PROFILE_IMAGE_NOT_FOUND: "Profile image not found",
-  TRIP_CREATED: "Your ride has been created successfully",
-  AVAILABLE_TRIPS_FETCHED: "Available rides list is fetched successfully",
+  RIDE_CREATED: "Your ride has been created successfully",
+  AVAILABLE_RIDES_FETCHED: "Available rides list is fetched successfully",
   VEHICLES_FETCHED_SUCCESSFULLY: "Vehicles are fetched successfully",
-  NO_RIDES_FOUND:"There are no rides yet between these cities"
+  NO_RIDES_FOUND: "There are rides not available yet between these cities",
+  BOOKING_REQUEST_CREATED: "Booking request created successfully",
+  SEATS_ARE_NOT_AVAILABLE: "No of seates are less than your requirement",
+  RIDE_IS_FULL: "Ride is full no more seats are available ",
+  BOOKING_REQUEST_ACCEPTED: "Your booking request accepted",
+  PROFILE_UPDATED: "Profile updated successfully",
+  RIDE_NOT_FOUND: "Ride not found",
+  CANNOT_UPDATE_A_RIDE: "You can't update this trip.",
+  CANNOT_CANCEL_A_RIDE: "You can't cancel this ride.",
+  RIDE_UPDATED: "Ride updated successfully",
+  CANCEL_OFFERED_RIDE: "You cancelled your offered ride",
+  CANCEL_REQUESTED_RIDE: "Your requested ride is cancelled",
+  INCORRECT_OLD_PASSWORD: "Incorrect old password",
+  RIDE_STATUS_ACCEPTED: "Your ride has been accepted",
+  RIDE_STATUS_REJECTED: "Your ride has been rejected",
 };
 
 module.exports = responseMessages;

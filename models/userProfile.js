@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const User = require("./user");
+const user = require("./user");
 const Vehicle = require("./userVehicle");
 
 const Profile = sequelize.define("profiles", {
@@ -13,7 +13,7 @@ const Profile = sequelize.define("profiles", {
   user_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: User,
+      model: user,
       key: "id",
     },
   },

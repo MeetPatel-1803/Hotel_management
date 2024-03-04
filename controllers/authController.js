@@ -1,5 +1,5 @@
 const registrationValidation = require("../validations/registrationValidation");
-const User = require("../models/user");
+const user = require("../models/user");
 const loginValidation = require("../validations/loginValidation");
 const { generateJWTToken } = require("../utils/JWTToken");
 const bcrypt = require("bcrypt");
@@ -23,8 +23,11 @@ const {
   TOKEN_EXPIRED,
   LOGIN_SUCCESSFUL,
   MAIL_NOT_REGISTERED,
+  INCORRECT_OLD_PASSWORD,
+  SOMETHING_WRONG,
 } = require("../utils/message");
-const Profile = require("../models/userProfile");
+const changePasswordValidation = require("../validations/changePasswordValidation");
+const profile = require("../models/userProfile");
 
 /**
  * @description It will register a user and validate its credentials.
@@ -32,27 +35,27 @@ const Profile = require("../models/userProfile");
  * @param {*} res
  */
 
-const registerUser = async (req, res) => {
+const register = async (req, res) => {
   const reqParams = req.body;
   registrationValidation(reqParams, res, async (validate) => {
     if (validate) {
-      const user = await User.findOne({
+      const userDetail = await user.findOne({
         where: {
           email: reqParams.email,
         },
       });
-      if (!user) {
+      if (!userDetail) {
         bcrypt.hash(reqParams.password, 10, async (err, hash) => {
           if (err) {
             errorResponseData(res, err.message, 500);
           } else {
-            const user = await User.create({
+            const userData = await user.create({
               email: reqParams.email,
               password: hash,
               country_code: reqParams.country_code,
               mobile_no: reqParams.mobile_no,
             });
-            responseSuccessWithMessage(res, user, USER_REGISTERED);
+            responseSuccessWithMessage(res, userData, USER_REGISTERED);
           }
         });
       } else {
@@ -68,48 +71,52 @@ const registerUser = async (req, res) => {
  * @param {*} res
  */
 
-const logInUser = async (req, res) => {
+const login = async (req, res) => {
   const reqParams = req.body;
   loginValidation(reqParams, res, async (validate) => {
     if (validate) {
-      const user = await User.findOne({
+      const userDetail = await user.findOne({
         where: {
           email: reqParams.email,
         },
       });
 
-      if (!user) {
+      if (!userDetail) {
         return errorResponseData(res, UNAUTHORIZED_USER, 401);
       } else {
-        const profile = await Profile.findOne({
+        const profileData = await profile.findOne({
           where: {
-            user_id: user.id,
+            user_id: userDetail.id,
           },
         });
 
-        bcrypt.compare(reqParams.password, user.password, (err, isValid) => {
-          if (err) {
-            return errorResponseWithoutData(res, err);
-          } else if (!isValid) {
-            return errorResponseData(res, INCORRECT_PASSWORD, 400);
-          } else {
-            const tokenData = generateJWTToken(user.id, res);
-
-            if (profile) {
-              responseSuccessWithMessage(
-                res,
-                { isProfileCreated: true, token: tokenData.token },
-                LOGIN_SUCCESSFUL
-              );
+        bcrypt.compare(
+          reqParams.password,
+          userDetail.password,
+          (err, isValid) => {
+            if (err) {
+              return errorResponseWithoutData(res, err);
+            } else if (!isValid) {
+              return errorResponseData(res, INCORRECT_PASSWORD, 400);
             } else {
-              responseSuccessWithMessage(
-                res,
-                { isProfileCreated: false, token: tokenData.token },
-                LOGIN_SUCCESSFUL
-              );
+              const token = generateJWTToken(userDetail.id, res);
+
+              if (profileData) {
+                responseSuccessWithMessage(
+                  res,
+                  { isProfileCreated: true, token: token },
+                  LOGIN_SUCCESSFUL
+                );
+              } else {
+                responseSuccessWithMessage(
+                  res,
+                  { isProfileCreated: false, token: token },
+                  LOGIN_SUCCESSFUL
+                );
+              }
             }
           }
-        });
+        );
       }
     }
   });
@@ -124,13 +131,13 @@ const logInUser = async (req, res) => {
 const forgotPassword = async (req, res) => {
   const reqParams = req.body;
 
-  const user = await User.findOne({
+  const userDetail = await user.findOne({
     where: {
       email: reqParams.email,
     },
   });
 
-  if (user) {
+  if (userDetail) {
     const token = randomTokens(2);
     const d = new Date();
     const tokenExpire = new Date(
@@ -143,7 +150,7 @@ const forgotPassword = async (req, res) => {
       d.getMilliseconds()
     );
 
-    const setToken = await User.update(
+    const setToken = await user.update(
       { Token: token, token_expire: tokenExpire },
       { where: { email: reqParams.email } }
     );
@@ -189,25 +196,24 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   const reqParams = req.body;
   const token = reqParams.token;
-  const d = new Date();
 
   passwordValidation(reqParams, res, async (validate) => {
     if (validate) {
-      const user = await User.findOne({
+      const userDetail = await user.findOne({
         where: {
           Token: token,
         },
       });
 
-      if (user && user.token_expire < d) {
+      if (userDetail && userDetail.token_expire < new Date()) {
         return errorResponseWithoutData(res, TOKEN_EXPIRED, 401);
       } else {
-        if (user) {
+        if (userDetail) {
           bcrypt.hash(reqParams.password, 10, async (err, hash) => {
             if (err) {
               return errorResponseWithoutData(res, err);
             } else {
-              const setData = await User.update(
+              const setData = await user.update(
                 { password: hash, Token: null, token_expire: null },
                 { where: { Token: token } }
               );
@@ -226,9 +232,59 @@ const resetPassword = async (req, res) => {
   });
 };
 
+/**
+ * @description This function will change user's password based on old password.
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+
+const changePassword = async (req, res) => {
+  try {
+    const reqParams = req.body;
+
+    changePasswordValidation(reqParams, res, async (validate) => {
+      if (validate) {
+        const userData = await user.findOne({ where: { id: req.id } });
+
+        bcrypt.compare(
+          reqParams.oldPassword,
+          userData.password,
+          async (err, isValid) => {
+            if (err) {
+              return errorResponseData(res, err);
+            } else if (!isValid) {
+              return errorResponseData(res, INCORRECT_OLD_PASSWORD);
+            } else {
+              bcrypt.hash(reqParams.newPassword, 10, async (err, hash) => {
+                if (err) {
+                  return errorResponseData(res, err);
+                } else {
+                  const updateUserPassword = await user.update(
+                    { password: hash },
+                    { where: { id: req.id } }
+                  );
+
+                  if (!updateUserPassword) {
+                    return errorResponseWithoutData(res, SOMETHING_WRONG);
+                  }
+                  successResponseWithoutData(res, PASSWORD_UPDATED);
+                }
+              });
+            }
+          }
+        );
+      }
+    });
+  } catch (error) {
+    return errorResponseData(res, error.message);
+  }
+};
+
 module.exports = {
-  registerUser,
-  logInUser,
+  register,
+  login,
   forgotPassword,
   resetPassword,
+  changePassword,
 };

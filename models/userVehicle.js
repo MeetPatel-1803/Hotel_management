@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const User = require("./user");
+const user = require("./user");
 
 const Vehicle = sequelize.define("vehicles", {
   id: {
@@ -13,7 +13,7 @@ const Vehicle = sequelize.define("vehicles", {
     type: DataTypes.INTEGER,
     allowNull: false,
     References: {
-      model: User,
+      model: user,
       key: "id",
     },
   },
@@ -22,8 +22,19 @@ const Vehicle = sequelize.define("vehicles", {
     allowNull: false,
   },
   type: {
-    type: DataTypes.STRING(20),
+    type: DataTypes.ENUM,
     allowNull: false,
+    values: [
+      "SUV",
+      "Sedan",
+      "Hatchback",
+      "Coupe",
+      "Van",
+      "Compact Sedan",
+      "Compact SUV",
+      "MUV",
+    ],
+    defaultValue: "Hatchback",
   },
   number: {
     type: DataTypes.STRING(20),

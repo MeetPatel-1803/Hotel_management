@@ -1,54 +1,118 @@
 const { Op } = require("sequelize");
 const moment = require("moment");
 const { PAGINATION } = require("../constants/constants");
-const Trip = require("../models/trip");
+const trip = require("../models/trip");
 const {
   SOMETHING_WRONG,
-  TRIP_CREATED,
-  AVAILABLE_TRIPS_FETCHED,
+  RIDE_CREATED,
+  AVAILABLE_RIDES_FETCHED,
   NO_RIDES_FOUND,
+  RIDE_NOT_FOUND,
+  CANNOT_UPDATE_A_RIDE,
+  CANCEL_OFFERED_RIDE,
+  RIDE_UPDATED,
 } = require("../utils/message");
 const {
   errorResponseData,
   responseSuccessWithMessage,
+  successResponseWithoutData,
 } = require("../utils/response");
-const offerRideValidation = require("../validations/offerRideValidation");
+const addEditOfferRideValidation = require("../validations/offerRideValidation");
 const availableRideListValidation = require("../validations/availableRideListValidation");
+const bookingRequests = require("../models/bookingRequests");
+const sequelize = require("../config/database");
 
 /**
  * @description This function will create a trip for who want to provide trip.
  * @param {*} req
  * @param {*} res
  */
-const offerRide = async (req, res) => {
+const addEditOfferRide = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const reqParams = req.body;
 
-    offerRideValidation(reqParams, res, async (validate) => {
+    addEditOfferRideValidation(reqParams, res, async (validate) => {
       if (validate) {
-        const ride = await Trip.create({
-          user_id: req.id,
-          source_address: reqParams.sourceAddress,
-          source_lat: reqParams.sourceLat,
-          source_long: reqParams.sourceLong,
-          dest_address: reqParams.destAddress,
-          dest_lat: reqParams.destLat,
-          dest_long: reqParams.destLong,
-          departure_date: reqParams.departureDate,
-          departure_time: reqParams.departureTime,
-          available_seats: reqParams.availableSeats,
-          fare: reqParams.fare,
-          vehicle_id: reqParams.vehicleId,
-        });
+        if (reqParams.tripId) {
+          const tripExist = await trip.findOne({
+            where: { id: reqParams.tripId },
+          });
 
-        if (!ride) {
-          return errorResponseData(res, SOMETHING_WRONG, 500);
+          if (!tripExist) {
+            return errorResponseData(res, RIDE_NOT_FOUND);
+          }
+
+          if (reqParams?.cancelOfferRide) {
+            await trip.destroy({
+              where: { id: reqParams.tripId },
+            });
+
+            await transaction.commit();
+            return successResponseWithoutData(res, CANCEL_OFFERED_RIDE);
+          } 
+            const isTripStatusAccepted = await bookingRequests.findAll({
+              where: { trip_id: reqParams.tripId, status: "accepted" },
+              attributes: ["trip_id", "status"],
+            });
+
+            if (isTripStatusAccepted.length == 0) {
+              const updateCondition = {
+                source_address: reqParams.sourceAddress,
+                source_lat: reqParams.sourceLat,
+                source_long: reqParams.sourceLong,
+                dest_address: reqParams.destAddress,
+                dest_lat: reqParams.destLat,
+                dest_long: reqParams.destLong,
+                departure_date: reqParams.departureDate,
+                departure_time: reqParams.departureTime,
+                available_seats: reqParams.availableSeats,
+                fare: reqParams.fare,
+                vehicle_id: reqParams.vehicleId,
+              };
+
+              await trip.update(updateCondition, {
+                where: { id: reqParams.tripId },
+              });
+
+              const updatedTrip = await trip.findOne({
+                where: { id: reqParams.tripId },
+              });
+
+              await transaction.commit();
+              return responseSuccessWithMessage(res, updatedTrip, RIDE_UPDATED);
+            } else {
+              return errorResponseData(res, CANNOT_UPDATE_A_RIDE);
+            }
+          
+        } else {
+          const ride = await trip.create({
+            user_id: req.id,
+            source_address: reqParams.sourceAddress,
+            source_lat: reqParams.sourceLat,
+            source_long: reqParams.sourceLong,
+            dest_address: reqParams.destAddress,
+            dest_lat: reqParams.destLat,
+            dest_long: reqParams.destLong,
+            departure_date: reqParams.departureDate,
+            departure_time: reqParams.departureTime,
+            available_seats: reqParams.availableSeats,
+            fare: reqParams.fare,
+            vehicle_id: reqParams.vehicleId,
+          });
+
+          if (!ride) {
+            return errorResponseData(res, SOMETHING_WRONG, 500);
+          }
+
+          await transaction.commit();
+          return responseSuccessWithMessage(res, ride, RIDE_CREATED);
         }
-        responseSuccessWithMessage(res, ride, TRIP_CREATED);
       }
     });
   } catch (error) {
-    return errorResponseData(res, error);
+    await transaction.rollback();
+    return errorResponseData(res, error.message);
   }
 };
 
@@ -69,31 +133,31 @@ const availableRidesList = async (req, res) => {
           ? parseInt(reqParams.page)
           : PAGINATION.PAGE;
 
-        const per_page = reqParams.per_page
-          ? parseInt(reqParams.per_page)
+        const perPage = reqParams.perPage
+          ? parseInt(reqParams.perPage)
           : PAGINATION.PER_PAGE;
 
-        const pageItems = (page - 1) * per_page;
+        const pageItems = (page - 1) * perPage;
 
         let sortingOrder = [["created_at", "DESC"]];
 
-        if (reqParams.sort_by && reqParams.sort_type) {
-          sortingOrder = [[reqParams.sort_by, reqParams.sort_type]];
+        if (reqParams.sortBy && reqParams.sortType) {
+          sortingOrder = [[reqParams.sortBy, reqParams.sortType]];
         }
 
-        const listOfRides = await Trip.findAndCountAll({
+        const listOfRides = await trip.findAndCountAll({
           where: {
-            ...(reqParams.source_address && {
-              source_address: reqParams.source_address,
+            ...(reqParams.sourceAddress && {
+              source_address: reqParams.sourceAddress,
             }),
-            ...(reqParams.dest_address && {
-              dest_address: reqParams.dest_address,
+            ...(reqParams.destAddress && {
+              dest_address: reqParams.destAddress,
             }),
-            ...(reqParams.departure_date_from && reqParams.departure_date_to
+            ...(reqParams.departureDateFrom && reqParams.departureDateTo
               ? {
                   departure_date: {
-                    [Op.gte]: reqParams.departure_date_from,
-                    [Op.lte]: reqParams.departure_date_to,
+                    [Op.gte]: reqParams.departureDateFrom,
+                    [Op.lte]: reqParams.departureDateTo,
                   },
                 }
               : {
@@ -101,11 +165,11 @@ const availableRidesList = async (req, res) => {
                     [Op.gte]: moment(new Date()).format("YYYY-MM-DD"),
                   },
                 }),
-            ...(reqParams.departure_time_from && reqParams.departure_time_to
+            ...(reqParams.departureTimeFrom && reqParams.departureTimeTo
               ? {
                   departure_time: {
-                    [Op.gte]: reqParams.departure_time_from,
-                    [Op.lte]: reqParams.departure_time_to,
+                    [Op.gte]: reqParams.departureTimeFrom,
+                    [Op.lte]: reqParams.departureTimeTo,
                   },
                 }
               : {
@@ -113,24 +177,24 @@ const availableRidesList = async (req, res) => {
                     [Op.gte]: moment(new Date()).format("HH:MM:SS"),
                   },
                 }),
-            ...(reqParams.no_of_passanger
+            ...(reqParams.noOfPassanger
               ? {
                   available_seats: {
-                    [Op.eq]: parseInt(reqParams.no_of_passanger),
+                    [Op.gte]: parseInt(reqParams.noOfPassanger),
                   },
                 }
               : { available_seats: { [Op.gte]: 1 } }),
-            ...(reqParams.fare_min && reqParams.fare_max
+            ...(reqParams.fareMin && reqParams.fareMax
               ? {
                   fare: {
-                    [Op.gte]: reqParams.fare_min,
-                    [Op.lte]: reqParams.fare_max,
+                    [Op.gte]: reqParams.fareMin,
+                    [Op.lte]: reqParams.fareMax,
                   },
                 }
               : { fare: { [Op.gte]: 0, [Op.lte]: 500 } }),
           },
           order: sortingOrder,
-          limit: per_page,
+          limit: perPage,
           offset: pageItems,
         });
 
@@ -141,10 +205,10 @@ const availableRidesList = async (req, res) => {
         return responseSuccessWithMessage(
           res,
           listOfRides.rows,
-          AVAILABLE_TRIPS_FETCHED,
+          AVAILABLE_RIDES_FETCHED,
           1,
           page,
-          per_page,
+          perPage,
           { totalCount: listOfRides.count }
         );
       }
@@ -154,4 +218,4 @@ const availableRidesList = async (req, res) => {
   }
 };
 
-module.exports = { offerRide, availableRidesList };
+module.exports = { addEditOfferRide, availableRidesList };

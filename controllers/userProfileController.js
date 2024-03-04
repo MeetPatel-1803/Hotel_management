@@ -1,5 +1,5 @@
 const profileValidation = require("../validations/userProfileValidation");
-const Profile = require("../models/userProfile");
+const profile = require("../models/userProfile");
 const { randomDigits } = require("../utils/helper");
 const {
   PROFILE_FORM_SUBMITTED,
@@ -8,12 +8,18 @@ const {
   PROFILE_NOT_FOUND,
   IMAGE_UPLOADED,
   PROFILE_IMAGE_NOT_FOUND,
+  PROFILE_UPDATED,
 } = require("../utils/message");
 const {
   responseSuccessWithMessage,
   errorResponseWithoutData,
+  errorResponseData,
 } = require("../utils/response");
-const { generatePreSignedUrl, removeOldImage } = require("../utils/s3Bucket");
+const {
+  generatePreSignedUrl,
+  removeOldImage,
+  fetchPreSignedUrl,
+} = require("../utils/s3Bucket");
 const imageValidation = require("../validations/imageValidation");
 
 /**
@@ -21,14 +27,30 @@ const imageValidation = require("../validations/imageValidation");
  * @param {*} req
  * @param {*} res
  */
-const userProfile = async (req, res) => {
-  const profile = await Profile.findOne({
-    where: {
-      user_id: req.id,
-    },
-  });
+const getProfile = async (req, res) => {
+  try {
+    const profileDetail = await profile.findOne({
+      where: {
+        user_id: req.id,
+      },
+    });
 
-  responseSuccessWithMessage(res, profile, USER_PROFILE_FETCHED, (code = 1));
+    if (!profileDetail) {
+      return errorResponseData(res, PROFILE_NOT_FOUND);
+    }
+
+    const file = profileDetail.profile_picture;
+    const imageUrl = fetchPreSignedUrl(file);
+
+    responseSuccessWithMessage(
+      res,
+      { profileDetail, imageUrl },
+      USER_PROFILE_FETCHED,
+      (code = 1)
+    );
+  } catch (error) {
+    return errorResponseData(res, error.message);
+  }
 };
 
 /**
@@ -37,26 +59,63 @@ const userProfile = async (req, res) => {
  * @param {*} res
  */
 
-const userProfileForm = async (req, res) => {
-  const reqParams = req.body;
+const addEditProfile = async (req, res) => {
+  try {
+    const reqParams = req.body;
 
-  profileValidation(reqParams, res, async (validate) => {
-    if (validate) {
-      const setData = await Profile.create({
-        user_id: req.id,
-        first_name: reqParams.first_name,
-        last_name: reqParams.last_name,
-        date_of_birth: reqParams.date_of_birth,
-        gender: reqParams.gender,
-      });
+    profileValidation(reqParams, res, async (validate) => {
+      if (validate) {
+        if (reqParams.profileId) {
+          const profileExist = await profile.findOne({
+            where: { id: reqParams.profileId },
+          });
 
-      if (!setData) {
-        return errorResponseWithoutData(res, SOMETHING_WRONG);
-      } else {
-        responseSuccessWithMessage(res, setData, PROFILE_FORM_SUBMITTED);
+          if (!profileExist) {
+            return errorResponseData(res, PROFILE_NOT_FOUND);
+          }
+
+          const updateCondition = {
+            first_name: reqParams?.first_name,
+            last_name: reqParams?.last_name,
+            bio: reqParams?.bio,
+            address: reqParams?.address,
+            gender: reqParams?.gender,
+            date_of_birth: reqParams?.date_of_birth,
+          };
+
+          await profile.update(updateCondition, {
+            where: { id: reqParams.profileId },
+          });
+
+          const updatedProfile = await profile.findOne({
+            where: { id: reqParams.profileId },
+          });
+
+          responseSuccessWithMessage(
+            res,
+            { updatedProfile: updatedProfile },
+            PROFILE_UPDATED
+          );
+        } else {
+          const setData = await profile.create({
+            user_id: req.id,
+            first_name: reqParams?.first_name,
+            last_name: reqParams?.last_name,
+            date_of_birth: reqParams?.date_of_birth,
+            gender: reqParams?.gender,
+          });
+
+          if (!setData) {
+            return errorResponseWithoutData(res, SOMETHING_WRONG);
+          } else {
+            responseSuccessWithMessage(res, setData, PROFILE_FORM_SUBMITTED);
+          }
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    return errorResponseData(res, error.message);
+  }
 };
 
 /**
@@ -65,12 +124,22 @@ const userProfileForm = async (req, res) => {
  * @param {*} res
  */
 
-const userProfilePicture = async (req, res) => {
+const addEditProfilePicture = async (req, res) => {
   const reqParams = req.body;
 
   try {
     imageValidation(reqParams, res, async (validate) => {
       if (validate) {
+        const profileDetail = await profile.findOne({
+          where: { id: reqParams.profileId },
+          attributes: ["profile_picture"],
+        });
+
+        if (profileDetail.profile_picture != null) {
+          const file = `${process.env.FILE_PATH_PROFILE}/${profileDetail.profile_picture}`;
+          await removeOldImage(process.env.AWS_BUCKET_NAME, file, res);
+        }
+
         const imgExtension = reqParams.mimetype.split("/")[1];
         const imgFileName = reqParams.mimetype.split("/")[0];
         const fileName = `${Date.now()}${randomDigits(
@@ -79,9 +148,9 @@ const userProfilePicture = async (req, res) => {
         const key = `${process.env.FILE_PATH_PROFILE}/${fileName}`;
         const expiresIn = 600;
 
-        const profileImage = await Profile.update(
+        const profileImage = await profile.update(
           { profile_picture: fileName },
-          { where: { id: reqParams.id } }
+          { where: { id: reqParams.profileId } }
         );
 
         if (!profileImage) {
@@ -93,25 +162,29 @@ const userProfilePicture = async (req, res) => {
           key,
           expiresIn
         );
-        responseSuccessWithMessage(res, { Profile_image: url }, IMAGE_UPLOADED);
+        return responseSuccessWithMessage(
+          res,
+          { Profile_image: url },
+          IMAGE_UPLOADED
+        );
       }
     });
   } catch (error) {
-    return errorResponseData(res, error, 400);
+    return errorResponseData(res, error.message);
   }
 };
 
 /**
  * @description This function will delete uploaded image from database and s3 Bucket.
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * @param {*} req
+ * @param {*} res
+ * @returns
  */
 
 const removeProfilePicture = async (req, res) => {
   const reqParams = req.body;
   try {
-    const profileImage = await Profile.findOne({
+    const profileImage = await profile.findOne({
       where: { id: reqParams.id },
     });
 
@@ -119,7 +192,7 @@ const removeProfilePicture = async (req, res) => {
       return errorResponseData(res, PROFILE_IMAGE_NOT_FOUND, 404);
     }
 
-    await Profile.update(
+    await profile.update(
       { profile_picture: null },
       { where: { profile_picture: profileImage.profile_picture } }
     );
@@ -132,8 +205,8 @@ const removeProfilePicture = async (req, res) => {
 };
 
 module.exports = {
-  userProfileForm,
-  userProfile,
-  userProfilePicture,
+  addEditProfile,
+  getProfile,
+  addEditProfilePicture,
   removeProfilePicture,
 };

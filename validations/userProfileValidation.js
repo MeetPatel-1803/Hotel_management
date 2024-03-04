@@ -17,6 +17,7 @@ const profileValidation = (req, res, callback) => {
     address: Joi.string(),
     gender: Joi.string().valid("male", "female").insensitive(),
     date_of_birth: Joi.date(),
+    profileId: Joi.number().optional(),
   });
 
   const { error } = schema.validate(req);

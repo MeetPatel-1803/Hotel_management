@@ -1,6 +1,5 @@
 const aws = require("aws-sdk");
-const { responseSuccessWithMessage, errorResponseData } = require("./response");
-const { IMAGE_REMOVED } = require("./message");
+const { errorResponseData } = require("./response");
 
 const credentials = {
   accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -33,19 +32,35 @@ const generatePreSignedUrl = (AWS_BUCKET_NAME, FILE_PATH, expiresIn) => {
  * @returns
  */
 const removeOldImage = (AWS_BUCKET_NAME, FILE_PATH, res) => {
-  return s3.deleteObject(
-    {
-      Bucket: AWS_BUCKET_NAME,
-      Key: FILE_PATH,
-    },
-    (err, data) => {
-      if (data) {
-        return responseSuccessWithMessage(res, data, IMAGE_REMOVED);
-      }
-
-      return errorResponseData(res, err);
+  return new Promise((resolve, reject) => {
+    try {
+      return s3.deleteObject(
+        {
+          Bucket: AWS_BUCKET_NAME,
+          Key: FILE_PATH,
+        },
+        (err, data) => {
+          if (data) {
+            resolve({ data });
+          }
+          reject(res, err);
+        }
+      );
+    } catch (error) {
+      return errorResponseData(res, error.message);
     }
-  );
+  });
 };
 
-module.exports = { generatePreSignedUrl, removeOldImage };
+const fetchPreSignedUrl = (file) => {
+  try {
+    return s3.getSignedUrl("getObject", {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: `${process.env.FILE_PATH_PROFILE}/${file}`,
+    });
+  } catch (error) {
+    return errorResponseData(res, error.message);
+  }
+};
+
+module.exports = { generatePreSignedUrl, removeOldImage, fetchPreSignedUrl };

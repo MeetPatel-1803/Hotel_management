@@ -12,22 +12,15 @@ module.exports = {
       expiresIn: process.env.JWT_EXPIRE,
     });
 
-    const options = {
-      expires: new Date(
-        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-    };
-
-    return { token, options };
+    return token;
   },
 
   /**
    * @description This function will verify jwt token.
-   * @param {*} token 
-   * @returns 
+   * @param {*} token
+   * @returns
    */
   verifyToken(token) {
     return jwt.verify(token, process.env.JWT_SECRETKEY);
-  }
+  },
 };
