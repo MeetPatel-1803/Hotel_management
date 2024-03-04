@@ -9,6 +9,8 @@ const {
   RIDE_UPDATED,
   RIDE_STATUS_ACCEPTED,
   RIDE_STATUS_REJECTED,
+  CANNOT_CANCEL_A_RIDE,
+  CANCEL_REQUESTED_RIDE,
 } = require("../utils/message");
 const {
   errorResponseData,
@@ -18,6 +20,10 @@ const {
 const addEditRideRequestValidation = require("../validations/addEditRideRequestValidation");
 const sequelize = require("../config/database");
 const updateStatusOfRideRequestValidation = require("../validations/updateStatusOfRideRequestValidation");
+const cancelRideRequestValidation = require("../validations/cancelRideRequestValidation");
+const {
+  ConversationContextImpl,
+} = require("twilio/lib/rest/conversations/v1/conversation");
 
 /**
  * @description This function will create booking request antry in table & send message to driver.
@@ -171,4 +177,42 @@ const updateStatusOfRideRequest = async (req, res) => {
     return errorResponseData(res, error.message);
   }
 };
-module.exports = { addEditRideRequest, updateStatusOfRideRequest };
+
+/**
+ * @description This function will cancel rquested ride.
+ * @param {*} req
+ * @param {*} res
+ */
+const cancelRideRequest = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const reqParams = req.body;
+
+    cancelRideRequestValidation(reqParams, res, async (validate) => {
+      if (validate) {
+        const existRequest = await bookingRequests.findOne({
+          where: { id: reqParams.booking_request_id, status: "pending" },
+        });
+
+        if (!existRequest) {
+          return successResponseWithoutData(res, CANNOT_CANCEL_A_RIDE);
+        }
+
+        await bookingRequests.destroy({
+          where: { id: reqParams.booking_request_id },
+        });
+
+        await transaction.commit();
+        return successResponseWithoutData(res, CANCEL_REQUESTED_RIDE);
+      }
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return errorResponseData(res, error.message);
+  }
+};
+module.exports = {
+  addEditRideRequest,
+  updateStatusOfRideRequest,
+  cancelRideRequest,
+};
