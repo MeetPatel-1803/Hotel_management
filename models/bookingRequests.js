@@ -43,4 +43,6 @@ const bookingRequests = sequelize.define("booking_requests", {
   },
 });
 
+bookingRequests.belongsTo(trip, { foreignKey: 'trip_id' });
+
 module.exports = bookingRequests;

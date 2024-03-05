@@ -42,6 +42,8 @@ const responseMessages = {
   RIDE_STATUS_REJECTED: "Your ride has been rejected",
   REQUESTS_NOT_FOUND: "Requests are not found",
   REQUESTS_LIST_FETCHED: "Requests are fetched successfully",
+  RIDES_NOT_FOUND: "Rides are not found",
+  RIDES_LIST_FETCHED: "Rides list fetched",
 };
 
 module.exports = responseMessages;
