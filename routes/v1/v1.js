@@ -28,6 +28,7 @@ const {
   addEditRideRequest,
   updateStatusOfRideRequest,
   cancelRideRequest,
+  getBookingRequestList,
 } = require("../../controllers/bookingRequestController");
 
 /**
@@ -77,5 +78,6 @@ router.post(
   updateStatusOfRideRequest
 );
 router.delete("/cancel-ride-request", isAuthenticatedUser, cancelRideRequest);
+router.get("/booking-request-list", isAuthenticatedUser, getBookingRequestList);
 
 module.exports = router;

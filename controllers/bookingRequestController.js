@@ -1,4 +1,4 @@
-const { Sequelize } = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 const bookingRequests = require("../models/bookingRequests");
 const trip = require("../models/trip");
 const {
@@ -11,6 +11,8 @@ const {
   RIDE_STATUS_REJECTED,
   CANNOT_CANCEL_A_RIDE,
   CANCEL_REQUESTED_RIDE,
+  RIDES_NOT_FOUND,
+  RIDES_FETCHED,
 } = require("../utils/message");
 const {
   errorResponseData,
@@ -24,6 +26,8 @@ const cancelRideRequestValidation = require("../validations/cancelRideRequestVal
 const {
   ConversationContextImpl,
 } = require("twilio/lib/rest/conversations/v1/conversation");
+const getBookingRequestListValidation = require("../validations/getBookingRequestListValidation");
+const { RIDE_STATUS, PAGINATION } = require("../constants/constants");
 
 /**
  * @description This function will create booking request antry in table & send message to driver.
@@ -211,8 +215,78 @@ const cancelRideRequest = async (req, res) => {
     return errorResponseData(res, error.message);
   }
 };
+
+/**
+ * @description This function will lists a booking request rides based on status.
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+
+const getBookingRequestList = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const reqParams = req.query;
+
+    getBookingRequestListValidation(reqParams, res, async (validate) => {
+      if (validate) {
+        const order = [["created_at", "DESC"]];
+
+        const page = reqParams.page
+          ? parseInt(reqParams.page)
+          : PAGINATION.PAGE;
+
+        const perPage = reqParams.perPage
+          ? parseInt(reqParams.perPage)
+          : PAGINATION.PER_PAGE;
+
+        const offset = (page - 1) * perPage;
+
+        const stringMatch = reqParams?.status.match(RIDE_STATUS[3]);
+        let bookingRequestList;
+
+        if (stringMatch) {
+          bookingRequestList = await bookingRequests.findAndCountAll({
+            where: {
+              [Op.or]: { user_id: req.id, to_user_id: req.id },
+            },
+            order,
+            limit: perPage,
+            offset,
+          });
+        } else {
+          bookingRequestList = await bookingRequests.findAndCountAll({
+            where: {
+              [Op.or]: { user_id: req.id, to_user_id: req.id },
+              status: `${reqParams.status}`,
+            },
+            order,
+            limit: perPage,
+            offset,
+          });
+        }
+
+        if (bookingRequestList.rows.length == 0) {
+          return errorResponseData(res, RIDES_NOT_FOUND);
+        }
+
+        return responseSuccessWithMessage(
+          res,
+          bookingRequestList.rows,
+          RIDES_FETCHED,
+          1,
+          { page, perPage, totalCount: bookingRequestList.count }
+        );
+      }
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return errorResponseData(res, error.message);
+  }
+};
 module.exports = {
   addEditRideRequest,
   updateStatusOfRideRequest,
   cancelRideRequest,
+  getBookingRequestList,
 };
