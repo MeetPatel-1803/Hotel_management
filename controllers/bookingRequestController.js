@@ -11,8 +11,8 @@ const {
   RIDE_STATUS_REJECTED,
   CANNOT_CANCEL_A_RIDE,
   CANCEL_REQUESTED_RIDE,
-  RIDES_NOT_FOUND,
-  RIDES_FETCHED,
+  REQUESTS_NOT_FOUND,
+  REQUESTS_LIST_FETCHED,
 } = require("../utils/message");
 const {
   errorResponseData,
@@ -23,11 +23,8 @@ const addEditRideRequestValidation = require("../validations/addEditRideRequestV
 const sequelize = require("../config/database");
 const updateStatusOfRideRequestValidation = require("../validations/updateStatusOfRideRequestValidation");
 const cancelRideRequestValidation = require("../validations/cancelRideRequestValidation");
-const {
-  ConversationContextImpl,
-} = require("twilio/lib/rest/conversations/v1/conversation");
 const getBookingRequestListValidation = require("../validations/getBookingRequestListValidation");
-const { RIDE_STATUS, PAGINATION } = require("../constants/constants");
+const { PAGINATION } = require("../constants/constants");
 
 /**
  * @description This function will create booking request antry in table & send message to driver.
@@ -218,9 +215,9 @@ const cancelRideRequest = async (req, res) => {
 
 /**
  * @description This function will lists a booking request rides based on status.
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * @param {*} req
+ * @param {*} res
+ * @returns
  */
 
 const getBookingRequestList = async (req, res) => {
@@ -242,38 +239,29 @@ const getBookingRequestList = async (req, res) => {
 
         const offset = (page - 1) * perPage;
 
-        const stringMatch = reqParams?.status.match(RIDE_STATUS[3]);
-        let bookingRequestList;
+        let where = {
+          [Op.or]: { user_id: req.id, to_user_id: req.id },
+        };
 
-        if (stringMatch) {
-          bookingRequestList = await bookingRequests.findAndCountAll({
-            where: {
-              [Op.or]: { user_id: req.id, to_user_id: req.id },
-            },
-            order,
-            limit: perPage,
-            offset,
-          });
-        } else {
-          bookingRequestList = await bookingRequests.findAndCountAll({
-            where: {
-              [Op.or]: { user_id: req.id, to_user_id: req.id },
-              status: `${reqParams.status}`,
-            },
-            order,
-            limit: perPage,
-            offset,
-          });
+        if (reqParams?.status) {
+          where.status = reqParams?.status;
         }
 
+        const bookingRequestList = await bookingRequests.findAndCountAll({
+          where,
+          order,
+          limit: perPage,
+          offset,
+        });
+
         if (bookingRequestList.rows.length == 0) {
-          return errorResponseData(res, RIDES_NOT_FOUND);
+          return errorResponseData(res, REQUESTS_NOT_FOUND);
         }
 
         return responseSuccessWithMessage(
           res,
           bookingRequestList.rows,
-          RIDES_FETCHED,
+          REQUESTS_LIST_FETCHED,
           1,
           { page, perPage, totalCount: bookingRequestList.count }
         );

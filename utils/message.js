@@ -40,8 +40,8 @@ const responseMessages = {
   INCORRECT_OLD_PASSWORD: "Incorrect old password",
   RIDE_STATUS_ACCEPTED: "Your ride has been accepted",
   RIDE_STATUS_REJECTED: "Your ride has been rejected",
-  RIDES_NOT_FOUND: "Rides are not found",
-  RIDES_FETCHED: "Rides are fetched successfully",
+  REQUESTS_NOT_FOUND: "Requests are not found",
+  REQUESTS_LIST_FETCHED: "Requests are fetched successfully",
 };
 
 module.exports = responseMessages;
