@@ -2,8 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const user = require("./user");
 const trip = require("./trip");
-const {RIDE_STATUS} = require('../constants/constants')
-console.log(Object.values(RIDE_STATUS));
+const { RIDE_STATUS } = require("../constants/constants");
 
 const bookingRequests = sequelize.define("booking_requests", {
   id: {
