@@ -11,8 +11,10 @@ const {
   RIDE_STATUS_REJECTED,
   CANNOT_CANCEL_A_RIDE,
   CANCEL_REQUESTED_RIDE,
-  REQUESTS_NOT_FOUND,
-  REQUESTS_LIST_FETCHED,
+  CREATED_RIDE_REQUESTS_NOT_FOUND,
+  CREATED_RIDE_REQUESTS_LIST_FETCHED,
+  BOOKED_RIDE_REQUESTS_NOT_FOUND,
+  BOOKED_RIDE_REQUESTS_LIST_FETCHED,
 } = require("../utils/message");
 const {
   errorResponseData,
@@ -23,8 +25,8 @@ const addEditRideRequestValidation = require("../validations/addEditRideRequestV
 const sequelize = require("../config/database");
 const updateStatusOfRideRequestValidation = require("../validations/updateStatusOfRideRequestValidation");
 const cancelRideRequestValidation = require("../validations/cancelRideRequestValidation");
-const getBookingRequestListValidation = require("../validations/getBookingRequestListValidation");
 const { PAGINATION } = require("../constants/constants");
+const bookingRequestListValidation = require("../validations/bookingRequestListValidation");
 
 /**
  * @description This function will create booking request antry in table & send message to driver.
@@ -214,7 +216,7 @@ const cancelRideRequest = async (req, res) => {
 };
 
 /**
- * @description This function will lists a booking request rides based on status.
+ * @description This function will lists a booking request to driver(a person who creates a trip) based on status.
  * @param {*} req
  * @param {*} res
  * @returns
@@ -225,7 +227,7 @@ const getBookingRequestList = async (req, res) => {
   try {
     const reqParams = req.query;
 
-    getBookingRequestListValidation(reqParams, res, async (validate) => {
+    bookingRequestListValidation(reqParams, res, async (validate) => {
       if (validate) {
         const order = [["created_at", "DESC"]];
 
@@ -240,7 +242,7 @@ const getBookingRequestList = async (req, res) => {
         const offset = (page - 1) * perPage;
 
         let where = {
-          [Op.or]: { user_id: req.id, to_user_id: req.id },
+          to_user_id: req.id,
         };
 
         if (reqParams?.status) {
@@ -255,13 +257,72 @@ const getBookingRequestList = async (req, res) => {
         });
 
         if (bookingRequestList.rows.length == 0) {
-          return errorResponseData(res, REQUESTS_NOT_FOUND);
+          return errorResponseData(res, CREATED_RIDE_REQUESTS_NOT_FOUND);
         }
 
         return responseSuccessWithMessage(
           res,
           bookingRequestList.rows,
-          REQUESTS_LIST_FETCHED,
+          CREATED_RIDE_REQUESTS_LIST_FETCHED,
+          1,
+          { page, perPage, totalCount: bookingRequestList.count }
+        );
+      }
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return errorResponseData(res, error.message);
+  }
+};
+
+/**
+ * @description This function will lists a booking request to rider(a person who request for a trip) based on status.
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+const getMyBookingRequestList = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const reqParams = req.query;
+
+    bookingRequestListValidation(reqParams, res, async (validate) => {
+      if (validate) {
+        const order = [["created_at", "DESC"]];
+
+        const page = reqParams.page
+          ? parseInt(reqParams.page)
+          : PAGINATION.PAGE;
+
+        const perPage = reqParams.perPage
+          ? parseInt(reqParams.perPage)
+          : PAGINATION.PER_PAGE;
+
+        const offset = (page - 1) * perPage;
+
+        let where = {
+          user_id: req.id,
+        };
+
+        if (reqParams?.status) {
+          where.status = reqParams?.status;
+        }
+
+        const bookingRequestList = await bookingRequests.findAndCountAll({
+          where,
+          order,
+          limit: perPage,
+          offset,
+        });
+
+        if (bookingRequestList.rows.length == 0) {
+          return errorResponseData(res, BOOKED_RIDE_REQUESTS_NOT_FOUND);
+        }
+
+        return responseSuccessWithMessage(
+          res,
+          bookingRequestList.rows,
+          BOOKED_RIDE_REQUESTS_LIST_FETCHED,
           1,
           { page, perPage, totalCount: bookingRequestList.count }
         );
@@ -277,4 +338,5 @@ module.exports = {
   updateStatusOfRideRequest,
   cancelRideRequest,
   getBookingRequestList,
+  getMyBookingRequestList,
 };
