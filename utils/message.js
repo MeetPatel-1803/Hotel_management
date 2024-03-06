@@ -40,6 +40,14 @@ const responseMessages = {
   INCORRECT_OLD_PASSWORD: "Incorrect old password",
   RIDE_STATUS_ACCEPTED: "Your ride has been accepted",
   RIDE_STATUS_REJECTED: "Your ride has been rejected",
+  CREATED_RIDE_REQUESTS_NOT_FOUND:
+    "You don't have any request for your created rides.",
+  CREATED_RIDE_REQUESTS_LIST_FETCHED:
+    "You've successfully retrieved the list of booking requests from users",
+  BOOKED_RIDE_REQUESTS_NOT_FOUND:
+    "You don't have any request for your booked rides.",
+  BOOKED_RIDE_REQUESTS_LIST_FETCHED:
+    "You've successfully retrieved the list of your booking requests",
 };
 
 module.exports = responseMessages;

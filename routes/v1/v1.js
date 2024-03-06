@@ -28,6 +28,8 @@ const {
   addEditRideRequest,
   updateStatusOfRideRequest,
   cancelRideRequest,
+  getBookingRequestList,
+  getMyBookingRequestList,
 } = require("../../controllers/bookingRequestController");
 
 /**
@@ -59,12 +61,12 @@ router.delete(
  * Vehicle
  */
 router.post("/add-edit-vehicle", isAuthenticatedUser, addEditVehicle);
+router.get("/user-vehicles-list", isAuthenticatedUser, getUserVehiclesList);
 
 /**
  * Rides
  */
 router.post("/add-edit-offer-ride", isAuthenticatedUser, addEditOfferRide);
-router.get("/user-vehicles-list", isAuthenticatedUser, getUserVehiclesList);
 router.get("/available-rides", isAuthenticatedUser, availableRidesList);
 
 /**
@@ -77,5 +79,7 @@ router.post(
   updateStatusOfRideRequest
 );
 router.delete("/cancel-ride-request", isAuthenticatedUser, cancelRideRequest);
+router.get("/booking-request-list", isAuthenticatedUser, getBookingRequestList);
+router.get("/my-booking-request-list", isAuthenticatedUser, getMyBookingRequestList);
 
 module.exports = router;

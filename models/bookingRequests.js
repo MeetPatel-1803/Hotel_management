@@ -2,6 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const user = require("./user");
 const trip = require("./trip");
+const { BOOKING_REQUEST_STATUS } = require("../constants/constants");
 
 const bookingRequests = sequelize.define("booking_requests", {
   id: {
@@ -36,7 +37,7 @@ const bookingRequests = sequelize.define("booking_requests", {
   },
   status: {
     type: DataTypes.ENUM,
-    values: ["accepted", "rejected", "pending"],
+    values: Object.values(BOOKING_REQUEST_STATUS),
     allowNull: false,
     defaultValue: "pending",
   },
