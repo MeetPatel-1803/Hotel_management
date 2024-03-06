@@ -13,7 +13,7 @@ const {
  * @returns
  */
 
-const getBookingRequestListValidation = (req, res, callback) => {
+const bookingRequestListValidation = (req, res, callback) => {
   const schema = Joi.object({
     page: Joi.number().allow(""),
     perPage: Joi.number().max(PAGINATION.MAXIMUM_PER_PAGE).allow("").optional(),
@@ -29,4 +29,4 @@ const getBookingRequestListValidation = (req, res, callback) => {
     return callback(true);
   }
 };
-module.exports = getBookingRequestListValidation;
+module.exports = bookingRequestListValidation;
