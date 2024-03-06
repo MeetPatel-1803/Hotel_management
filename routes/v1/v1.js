@@ -67,21 +67,21 @@ router.get("/user-vehicles-list", isAuthenticatedUser, getUserVehiclesList);
 /**
  * Rides
  */
-router.post("/add-edit-offer-ride", isAuthenticatedUser, addEditOfferRide);
+router.post("/add-edit-ride", isAuthenticatedUser, addEditOfferRide);
 router.get("/available-rides", isAuthenticatedUser, availableRidesList);
 
 /**
  * booking requested ride
  */
-router.post("/add-edit-ride-request", isAuthenticatedUser, addEditRideRequest);
+router.post("/add-edit-booking-request", isAuthenticatedUser, addEditRideRequest);
 router.post(
-  "/update-ride-status",
+  "/update-request-status",
   isAuthenticatedUser,
   updateStatusOfRideRequest
 );
-router.delete("/cancel-ride-request", isAuthenticatedUser, cancelRideRequest);
+router.delete("/cancel-booking-request", isAuthenticatedUser, cancelRideRequest);
 router.get("/booking-request-list", isAuthenticatedUser, getBookingRequestList);
 router.get("/my-booking-request-list", isAuthenticatedUser, getMyBookingRequestList);
-router.get("/my-rides-list", isAuthenticatedUser, myRidesList);
+router.get("/booked-and-offered-rides-list", isAuthenticatedUser, myRidesList);
 
 module.exports = router;
