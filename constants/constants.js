@@ -8,5 +8,5 @@ module.exports = {
     MAXIMUM_PER_PAGE: 100,
   },
   MAX_NO_OF_PASSANGER: 4,
-  RIDE_STATUS: ["pending", "accepted", "rejected", "all"],
+  BOOKING_REQUEST_STATUS: ["pending", "accepted", "rejected"],
 };
