@@ -10,7 +10,7 @@ const { MAX_NO_OF_PASSANGER } = require("../constants/constants");
  * @returns
  */
 
-const addEditOfferRideValidation = (req, res, callback) => {
+const addEditRideValidation = (req, res, callback) => {
   const schema = Joi.object({
     vehicleId: Joi.number(),
     trip_id:Joi.number(),
@@ -34,4 +34,4 @@ const addEditOfferRideValidation = (req, res, callback) => {
     return callback(true);
   }
 };
-module.exports = addEditOfferRideValidation;
+module.exports = addEditRideValidation;

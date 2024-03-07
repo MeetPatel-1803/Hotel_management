@@ -10,7 +10,7 @@ const { PAGINATION } = require("../constants/constants");
  * @returns
  */
 
-const myRidesListValidation = (req, res, callback) => {
+const bookedAndOfferedRidesListValidation = (req, res, callback) => {
   const schema = Joi.object({
     page: Joi.number().allow(""),
     perPage: Joi.number().max(PAGINATION.MAXIMUM_PER_PAGE).allow("").optional(),
@@ -24,4 +24,4 @@ const myRidesListValidation = (req, res, callback) => {
     return callback(true);
   }
 };
-module.exports = myRidesListValidation;
+module.exports = bookedAndOfferedRidesListValidation;
