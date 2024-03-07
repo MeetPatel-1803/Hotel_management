@@ -11,7 +11,7 @@ const { errorResponseData } = require("../utils/response");
 
 const cancelRideRequestValidation = (req, res, callback) => {
   const schema = Joi.object({
-    booking_request_id: Joi.number().required(),
+    trip_request_id: Joi.number().required(),
   });
 
   const { error } = schema.validate(req);
