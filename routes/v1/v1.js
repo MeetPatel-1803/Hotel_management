@@ -32,6 +32,10 @@ const {
   getBookingRequestList,
   getMyBookingRequestList,
 } = require("../../controllers/bookingRequestController");
+const {
+  addEditRideRequest,
+  cancelRideRequest,
+} = require("../../controllers/rideRequestController");
 
 /**
  * User
@@ -84,4 +88,9 @@ router.get("/booking-request-list", isAuthenticatedUser, getBookingRequestList);
 router.get("/my-booking-request-list", isAuthenticatedUser, getMyBookingRequestList);
 router.get("/booked-and-offered-rides-list", isAuthenticatedUser, bookedAndOfferedRidesList);
 
+/**
+ *  ride request
+ */
+router.post("/add-edit-ride-request", isAuthenticatedUser, addEditRideRequest);
+router.delete("/cancel-ride-request", isAuthenticatedUser, cancelRideRequest);
 module.exports = router;

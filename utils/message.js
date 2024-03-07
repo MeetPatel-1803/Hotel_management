@@ -48,6 +48,12 @@ const responseMessages = {
     "You don't have any request for your booked rides.",
   BOOKED_RIDE_REQUESTS_LIST_FETCHED:
     "You've successfully retrieved the list of your booking requests",
+  RIDE_REQUEST_NOT_EXIST: "This ride request doesn't exist",
+  RIDE_REQUEST_UPDATED: "Ride request updated successfully",
+  RIDE_REQUEST_CREATED: "Ride request created successfully",
+  RIDE_REQUEST_ALREADY_CREATED:
+    "You've already created an alert for this ride and date.",
+  RIDE_REQUEST_CANCELLED: "Your ride request is cancelled"
 };
 
 module.exports = responseMessages;
