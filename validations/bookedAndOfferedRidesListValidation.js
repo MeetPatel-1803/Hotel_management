@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const { errorResponseData } = require("../utils/response");
+const { PAGINATION } = require("../constants/constants");
 
 /**
  * @description It will validate cancel ride attributes.
@@ -9,9 +10,11 @@ const { errorResponseData } = require("../utils/response");
  * @returns
  */
 
-const cancelRideRequestValidation = (req, res, callback) => {
+const bookedAndOfferedRidesListValidation = (req, res, callback) => {
   const schema = Joi.object({
-    trip_request_id: Joi.number().required(),
+    page: Joi.number().allow(""),
+    perPage: Joi.number().max(PAGINATION.MAXIMUM_PER_PAGE).allow("").optional(),
+    rideType: Joi.string().trim().valid("booked", "offered"),
   });
 
   const { error } = schema.validate(req);
@@ -21,4 +24,4 @@ const cancelRideRequestValidation = (req, res, callback) => {
     return callback(true);
   }
 };
-module.exports = cancelRideRequestValidation;
+module.exports = bookedAndOfferedRidesListValidation;

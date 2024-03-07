@@ -19,23 +19,23 @@ const {
   responseSuccessWithMessage,
   successResponseWithoutData,
 } = require("../utils/response");
-const addEditOfferRideValidation = require("../validations/offerRideValidation");
+const addEditRideValidation = require("../validations/addEditRideValidation");
 const availableRideListValidation = require("../validations/availableRideListValidation");
 const bookingRequests = require("../models/bookingRequests");
 const sequelize = require("../config/database");
-const myRidesListValidation = require("../validations/myRidesListValidation");
+const bookedAndOfferedRidesListValidation = require("../validations/bookedAndOfferedRidesListValidation");
 
 /**
  * @description This function will create a trip for who want to provide trip.
  * @param {*} req
  * @param {*} res
  */
-const addEditOfferRide = async (req, res) => {
+const addEditRide = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const reqParams = req.body;
 
-    addEditOfferRideValidation(reqParams, res, async (validate) => {
+    addEditRideValidation(reqParams, res, async (validate) => {
       if (validate) {
         if (reqParams.tripId) {
           const tripExist = await trip.findOne({
@@ -227,12 +227,12 @@ const availableRidesList = async (req, res) => {
  * @returns
  */
 
-const myRidesList = async (req, res) => {
+const bookedAndOfferedRidesList = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const reqParams = req.query;
 
-    myRidesListValidation(reqParams, res, async (validate) => {
+    bookedAndOfferedRidesListValidation(reqParams, res, async (validate) => {
       if (validate) {
         const order = [["created_at", "DESC"]];
 
@@ -293,4 +293,4 @@ const myRidesList = async (req, res) => {
   }
 };
 
-module.exports = { addEditOfferRide, availableRidesList, myRidesList };
+module.exports = { addEditRide, availableRidesList, bookedAndOfferedRidesList };
