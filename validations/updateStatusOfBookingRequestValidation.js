@@ -9,7 +9,7 @@ const { errorResponseData } = require("../utils/response");
  * @returns
  */
 
-const updateStatusOfRideRequestValidation = (req, res, callback) => {
+const updateStatusOfBookingRequestValidation = (req, res, callback) => {
   const schema = Joi.object({
     booking_request_id: Joi.number().optional(),
     is_accepted: Joi.boolean().optional(),
@@ -23,4 +23,4 @@ const updateStatusOfRideRequestValidation = (req, res, callback) => {
     return callback(true);
   }
 };
-module.exports = updateStatusOfRideRequestValidation;
+module.exports = updateStatusOfBookingRequestValidation;

@@ -11,28 +11,31 @@ const {
   CANNOT_UPDATE_A_RIDE,
   CANCEL_OFFERED_RIDE,
   RIDE_UPDATED,
+  RIDES_LIST_FETCHED,
+  RIDES_NOT_FOUND,
 } = require("../utils/message");
 const {
   errorResponseData,
   responseSuccessWithMessage,
   successResponseWithoutData,
 } = require("../utils/response");
-const addEditOfferRideValidation = require("../validations/offerRideValidation");
+const addEditRideValidation = require("../validations/addEditRideValidation");
 const availableRideListValidation = require("../validations/availableRideListValidation");
 const bookingRequests = require("../models/bookingRequests");
 const sequelize = require("../config/database");
+const bookedAndOfferedRidesListValidation = require("../validations/bookedAndOfferedRidesListValidation");
 
 /**
  * @description This function will create a trip for who want to provide trip.
  * @param {*} req
  * @param {*} res
  */
-const addEditOfferRide = async (req, res) => {
+const addEditRide = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const reqParams = req.body;
 
-    addEditOfferRideValidation(reqParams, res, async (validate) => {
+    addEditRideValidation(reqParams, res, async (validate) => {
       if (validate) {
         if (reqParams.tripId) {
           const tripExist = await trip.findOne({
@@ -50,41 +53,40 @@ const addEditOfferRide = async (req, res) => {
 
             await transaction.commit();
             return successResponseWithoutData(res, CANCEL_OFFERED_RIDE);
-          } 
-            const isTripStatusAccepted = await bookingRequests.findAll({
-              where: { trip_id: reqParams.tripId, status: "accepted" },
-              attributes: ["trip_id", "status"],
+          }
+          const isTripStatusAccepted = await bookingRequests.findAll({
+            where: { trip_id: reqParams.tripId, status: "accepted" },
+            attributes: ["trip_id", "status"],
+          });
+
+          if (isTripStatusAccepted.length == 0) {
+            const updateCondition = {
+              source_address: reqParams.sourceAddress,
+              source_lat: reqParams.sourceLat,
+              source_long: reqParams.sourceLong,
+              dest_address: reqParams.destAddress,
+              dest_lat: reqParams.destLat,
+              dest_long: reqParams.destLong,
+              departure_date: reqParams.departureDate,
+              departure_time: reqParams.departureTime,
+              available_seats: reqParams.availableSeats,
+              fare: reqParams.fare,
+              vehicle_id: reqParams.vehicleId,
+            };
+
+            await trip.update(updateCondition, {
+              where: { id: reqParams.tripId },
             });
 
-            if (isTripStatusAccepted.length == 0) {
-              const updateCondition = {
-                source_address: reqParams.sourceAddress,
-                source_lat: reqParams.sourceLat,
-                source_long: reqParams.sourceLong,
-                dest_address: reqParams.destAddress,
-                dest_lat: reqParams.destLat,
-                dest_long: reqParams.destLong,
-                departure_date: reqParams.departureDate,
-                departure_time: reqParams.departureTime,
-                available_seats: reqParams.availableSeats,
-                fare: reqParams.fare,
-                vehicle_id: reqParams.vehicleId,
-              };
+            const updatedTrip = await trip.findOne({
+              where: { id: reqParams.tripId },
+            });
 
-              await trip.update(updateCondition, {
-                where: { id: reqParams.tripId },
-              });
-
-              const updatedTrip = await trip.findOne({
-                where: { id: reqParams.tripId },
-              });
-
-              await transaction.commit();
-              return responseSuccessWithMessage(res, updatedTrip, RIDE_UPDATED);
-            } else {
-              return errorResponseData(res, CANNOT_UPDATE_A_RIDE);
-            }
-          
+            await transaction.commit();
+            return responseSuccessWithMessage(res, updatedTrip, RIDE_UPDATED);
+          } else {
+            return errorResponseData(res, CANNOT_UPDATE_A_RIDE);
+          }
         } else {
           const ride = await trip.create({
             user_id: req.id,
@@ -218,4 +220,77 @@ const availableRidesList = async (req, res) => {
   }
 };
 
-module.exports = { addEditOfferRide, availableRidesList };
+/**
+ * @description This function will get ride list as offeredRides / bookedRides.
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+
+const bookedAndOfferedRidesList = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const reqParams = req.query;
+
+    bookedAndOfferedRidesListValidation(reqParams, res, async (validate) => {
+      if (validate) {
+        const order = [["created_at", "DESC"]];
+
+        const page = reqParams.page
+          ? parseInt(reqParams.page)
+          : PAGINATION.PAGE;
+
+        const perPage = reqParams.perPage
+          ? parseInt(reqParams.perPage)
+          : PAGINATION.PER_PAGE;
+
+        const offset = (page - 1) * perPage;
+        let ridesList;
+        let filterCondition = {
+          departure_date: {
+            [Op.gte]: moment(new Date()).format("YYYY-MM-DD"),
+          },
+        };
+
+        if (reqParams?.rideType) {
+          ridesList = await trip.findAndCountAll({
+            where: (filterCondition, { user_id: req.id }),
+            order,
+            limit: perPage,
+            offset,
+          });
+        } else {
+          ridesList = await bookingRequests.findAndCountAll({
+            where: { user_id: req.id },
+            include: [
+              {
+                model: trip,
+                where: filterCondition,
+              },
+            ],
+            order,
+            limit: perPage,
+            offset,
+          });
+        }
+
+        if (!ridesList.rows.length) {
+          return errorResponseData(res, RIDES_NOT_FOUND);
+        }
+
+        return responseSuccessWithMessage(
+          res,
+          ridesList.rows,
+          RIDES_LIST_FETCHED,
+          1,
+          { page, perPage, totalCount: ridesList.count }
+        );
+      }
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return errorResponseData(res, error.message);
+  }
+};
+
+module.exports = { addEditRide, availableRidesList, bookedAndOfferedRidesList };
