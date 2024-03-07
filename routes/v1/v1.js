@@ -26,9 +26,9 @@ const {
   bookedAndOfferedRidesList,
 } = require("../../controllers/ridesController");
 const {
-  addEditRideRequest,
-  updateStatusOfRideRequest,
-  cancelRideRequest,
+  addEditBookingRequest,
+  updateStatusOfBookingRequest,
+  cancelBookingRequest,
   getBookingRequestList,
   getMyBookingRequestList,
 } = require("../../controllers/bookingRequestController");
@@ -73,13 +73,13 @@ router.get("/available-rides", isAuthenticatedUser, availableRidesList);
 /**
  * booking requested ride
  */
-router.post("/add-edit-booking-request", isAuthenticatedUser, addEditRideRequest);
+router.post("/add-edit-booking-request", isAuthenticatedUser, addEditBookingRequest);
 router.post(
-  "/update-request-status",
+  "/update-booking-request-status",
   isAuthenticatedUser,
-  updateStatusOfRideRequest
+  updateStatusOfBookingRequest
 );
-router.delete("/cancel-booking-request", isAuthenticatedUser, cancelRideRequest);
+router.delete("/cancel-booking-request", isAuthenticatedUser, cancelBookingRequest);
 router.get("/booking-request-list", isAuthenticatedUser, getBookingRequestList);
 router.get("/my-booking-request-list", isAuthenticatedUser, getMyBookingRequestList);
 router.get("/booked-and-offered-rides-list", isAuthenticatedUser, bookedAndOfferedRidesList);

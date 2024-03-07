@@ -9,7 +9,7 @@ const { errorResponseData } = require("../utils/response");
  * @returns
  */
 
-const cancelRideRequestValidation = (req, res, callback) => {
+const cancelBookingRequestValidation = (req, res, callback) => {
   const schema = Joi.object({
     booking_request_id: Joi.number().required(),
   });
@@ -21,4 +21,4 @@ const cancelRideRequestValidation = (req, res, callback) => {
     return callback(true);
   }
 };
-module.exports = cancelRideRequestValidation;
+module.exports = cancelBookingRequestValidation;

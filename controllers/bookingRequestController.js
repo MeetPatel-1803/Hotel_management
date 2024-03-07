@@ -21,10 +21,10 @@ const {
   responseSuccessWithMessage,
   successResponseWithoutData,
 } = require("../utils/response");
-const addEditRideRequestValidation = require("../validations/addEditRideRequestValidation");
+const addEditBookingRequestValidation = require("../validations/addEditBookingRequestValidation");
 const sequelize = require("../config/database");
-const updateStatusOfRideRequestValidation = require("../validations/updateStatusOfRideRequestValidation");
-const cancelRideRequestValidation = require("../validations/cancelRideRequestValidation");
+const updateStatusOfBookingRequestValidation = require("../validations/updateStatusOfBookingRequestValidation");
+const cancelBookingRequestValidation = require("../validations/cancelBookingRequestValidation");
 const { PAGINATION } = require("../constants/constants");
 const bookingRequestListValidation = require("../validations/bookingRequestListValidation");
 
@@ -34,11 +34,11 @@ const bookingRequestListValidation = require("../validations/bookingRequestListV
  * @param {*} res
  * @returns
  */
-const addEditRideRequest = async (req, res) => {
+const addEditBookingRequest = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const reqParams = req.body;
-    addEditRideRequestValidation(reqParams, res, async (validate) => {
+    addEditBookingRequestValidation(reqParams, res, async (validate) => {
       if (validate) {
         if (reqParams.booking_request_id) {
           const existRequest = await bookingRequests.findOne({
@@ -107,12 +107,12 @@ const addEditRideRequest = async (req, res) => {
  * @returns
  */
 
-const updateStatusOfRideRequest = async (req, res) => {
+const updateStatusOfBookingRequest = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const reqParams = req.body;
 
-    updateStatusOfRideRequestValidation(reqParams, res, async (validate) => {
+    updateStatusOfBookingRequestValidation(reqParams, res, async (validate) => {
       if (validate) {
         const existRequest = await bookingRequests.findOne({
           where: { id: reqParams.booking_request_id, status: "pending" },
@@ -186,12 +186,12 @@ const updateStatusOfRideRequest = async (req, res) => {
  * @param {*} req
  * @param {*} res
  */
-const cancelRideRequest = async (req, res) => {
+const cancelBookingRequest = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const reqParams = req.body;
 
-    cancelRideRequestValidation(reqParams, res, async (validate) => {
+    cancelBookingRequestValidation(reqParams, res, async (validate) => {
       if (validate) {
         const existRequest = await bookingRequests.findOne({
           where: { id: reqParams.booking_request_id, status: "pending" },
@@ -334,9 +334,9 @@ const getMyBookingRequestList = async (req, res) => {
   }
 };
 module.exports = {
-  addEditRideRequest,
-  updateStatusOfRideRequest,
-  cancelRideRequest,
+  addEditBookingRequest,
+  updateStatusOfBookingRequest,
+  cancelBookingRequest,
   getBookingRequestList,
   getMyBookingRequestList,
 };
