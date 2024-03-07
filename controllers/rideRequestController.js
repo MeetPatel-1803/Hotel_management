@@ -13,7 +13,7 @@ const {
   successResponseWithoutData,
 } = require("../utils/response");
 const cancelRideRequestValidation = require("../validations/cancelRideRequestValidation");
-const rideRequestValidation = require("../validations/rideRequestValidation");
+const addEditRideRequestValidation = require("../validations/addEditRideRequestValidation");
 
 /**
  * @description This function will add / edit ride request(special request).
@@ -26,7 +26,7 @@ const addEditRideRequest = async (req, res) => {
   try {
     const reqParams = req.body;
 
-    rideRequestValidation(reqParams, res, async (validate) => {
+    addEditRideRequestValidation(reqParams, res, async (validate) => {
       if (validate) {
         let filterCondition = {
           source_address: reqParams.sourceAddress,
