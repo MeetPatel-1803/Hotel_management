@@ -17,8 +17,6 @@ const sequelize = require("../config/database");
 const { randomDigits } = require("../utils/helper");
 const { generatePreSignedUrl, removeOldImage } = require("../utils/s3Bucket");
 const deleteVehicleValidation = require("../validations/deleteVehicleValidation");
-const trip = require("../models/trip");
-const bookingRequests = require("../models/bookingRequests");
 
 /**
  * @description This function will add user vehicle and can update also.
@@ -87,22 +85,40 @@ const addEditVehicle = async (req, res) => {
             VEHICLE_UPDATED
           );
         } else {
-          let url;
-          if (reqParams.mimetype) {
-            const imgExtension = reqParams?.mimetype.split("/")[1];
-            const imgFileName = reqParams?.mimetype.split("/")[0];
-            const fileName = `${Date.now()}${randomDigits(
-              4
-            )}-${imgFileName}.${imgExtension}`;
+          try {
+            let url;
+            if (reqParams.mimetype) {
+              const imgExtension = reqParams?.mimetype.split("/")[1];
+              const imgFileName = reqParams?.mimetype.split("/")[0];
+              const fileName = `${Date.now()}${randomDigits(
+                4
+              )}-${imgFileName}.${imgExtension}`;
 
-            const key = `${process.env.FILE_PATH_VEHICLE}/${fileName}`;
-            const expiresIn = 600;
+              const key = `${process.env.FILE_PATH_VEHICLE}/${fileName}`;
+              const expiresIn = 600;
 
-            url = generatePreSignedUrl(
-              process.env.AWS_BUCKET_NAME,
-              key,
-              expiresIn
-            );
+              url = generatePreSignedUrl(
+                process.env.AWS_BUCKET_NAME,
+                key,
+                expiresIn
+              );
+
+              const setData = await vehicle.create({
+                user_id: req.id,
+                name: reqParams.name,
+                type: reqParams.type,
+                number: reqParams.number,
+                no_of_seats: reqParams.noOfSeats,
+                images: fileName,
+              });
+
+              await transaction.commit();
+              return responseSuccessWithMessage(
+                res,
+                { setData, image_url: url },
+                VEHICLE_ADDED
+              );
+            }
 
             const setData = await vehicle.create({
               user_id: req.id,
@@ -110,27 +126,14 @@ const addEditVehicle = async (req, res) => {
               type: reqParams.type,
               number: reqParams.number,
               no_of_seats: reqParams.noOfSeats,
-              images: fileName,
             });
 
             await transaction.commit();
-            return responseSuccessWithMessage(
-              res,
-              { setData, image_url: url },
-              VEHICLE_ADDED
-            );
+            return responseSuccessWithMessage(res, setData, VEHICLE_ADDED);
+          } catch (error) {
+            await transaction.rollback();
+            return errorResponseData(res, error.message);
           }
-
-          const setData = await vehicle.create({
-            user_id: req.id,
-            name: reqParams.name,
-            type: reqParams.type,
-            number: reqParams.number,
-            no_of_seats: reqParams.noOfSeats,
-          });
-
-          await transaction.commit();
-          return responseSuccessWithMessage(res, setData, VEHICLE_ADDED);
         }
       }
     });
@@ -189,6 +192,10 @@ const getUserVehiclesList = async (req, res) => {
     const vehicleList = await vehicle.findAll({
       where: { user_id: req.id },
     });
+
+    if (!vehicleList) {
+      return errorResponseData(res, VEHICLE_NOT_FOUND);
+    }
 
     return responseSuccessWithMessage(
       res,
