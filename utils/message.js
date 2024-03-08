@@ -15,6 +15,7 @@ const responseMessages = {
   UNAUTHORIZED: "Unauthorized",
   VEHICLE_ADDED: "Vehicel added successfully",
   VEHICLE_UPDATED: "Vehicel updated successfully",
+  VEHICLE_DELETED: "Vehicle deleted successfully",
   USER_PROFILE_FETCHED: "User profile fetched successfully",
   IMAGE_UPLOADED: "Image Uploaded successfully",
   VEHICLE_NOT_FOUND: "Vehicle not found",
@@ -53,7 +54,7 @@ const responseMessages = {
   RIDE_REQUEST_CREATED: "Ride request created successfully",
   RIDE_REQUEST_ALREADY_CREATED:
     "You've already created an alert for this ride and date.",
-  RIDE_REQUEST_CANCELLED: "Your ride request is cancelled"
+  RIDE_REQUEST_CANCELLED: "Your ride request is cancelled",
 };
 
 module.exports = responseMessages;

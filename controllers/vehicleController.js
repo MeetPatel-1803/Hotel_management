@@ -6,14 +6,19 @@ const {
   VEHICLE_NOT_FOUND,
   VEHICLE_IMAGE_NOT_FOUND,
   VEHICLES_FETCHED_SUCCESSFULLY,
+  VEHICLE_DELETED,
 } = require("../utils/message");
 const {
   responseSuccessWithMessage,
   errorResponseData,
+  successResponseWithoutData,
 } = require("../utils/response");
 const sequelize = require("../config/database");
 const { randomDigits } = require("../utils/helper");
 const { generatePreSignedUrl, removeOldImage } = require("../utils/s3Bucket");
+const deleteVehicleValidation = require("../validations/deleteVehicleValidation");
+const trip = require("../models/trip");
+const bookingRequests = require("../models/bookingRequests");
 
 /**
  * @description This function will add user vehicle and can update also.
@@ -115,6 +120,7 @@ const addEditVehicle = async (req, res) => {
               VEHICLE_ADDED
             );
           }
+
           const setData = await vehicle.create({
             user_id: req.id,
             name: reqParams.name,
@@ -126,6 +132,44 @@ const addEditVehicle = async (req, res) => {
           await transaction.commit();
           return responseSuccessWithMessage(res, setData, VEHICLE_ADDED);
         }
+      }
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return errorResponseData(res, error.message);
+  }
+};
+
+/**
+ * @description This function will delete vehicle & remove its pictures from DB & S3.
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+const deleteVehicle = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const reqParams = req.body;
+
+    deleteVehicleValidation(reqParams, res, async (validate) => {
+      if (validate) {
+        const existVehicle = await vehicle.findOne({
+          where: { id: reqParams.vehicleId },
+        });
+
+        if (!existVehicle) {
+          return successResponseWithoutData(res, VEHICLE_NOT_FOUND);
+        }
+
+        const file = `${process.env.FILE_PATH_VEHICLE}/${existVehicle.images}`;
+        removeOldImage(process.env.AWS_BUCKET_NAME, file, res);
+
+        await vehicle.destroy({
+          where: { id: reqParams.vehicleId },
+        });
+
+        await transaction.commit();
+        return successResponseWithoutData(res, VEHICLE_DELETED);
       }
     });
   } catch (error) {
@@ -158,5 +202,6 @@ const getUserVehiclesList = async (req, res) => {
 
 module.exports = {
   addEditVehicle,
+  deleteVehicle,
   getUserVehiclesList,
 };
