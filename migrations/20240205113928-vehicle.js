@@ -22,6 +22,7 @@ module.exports = {
           model: user,
           key: "id",
         },
+        onDelete: "CASCADE",
       },
       name: {
         type: DataTypes.STRING(50),

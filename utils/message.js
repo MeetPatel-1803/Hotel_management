@@ -15,6 +15,7 @@ const responseMessages = {
   UNAUTHORIZED: "Unauthorized",
   VEHICLE_ADDED: "Vehicel added successfully",
   VEHICLE_UPDATED: "Vehicel updated successfully",
+  VEHICLE_DELETED: "Vehicle deleted successfully",
   USER_PROFILE_FETCHED: "User profile fetched successfully",
   IMAGE_UPLOADED: "Image Uploaded successfully",
   VEHICLE_NOT_FOUND: "Vehicle not found",
@@ -22,6 +23,7 @@ const responseMessages = {
   VEHICLE_IMAGE_NOT_FOUND: "Vehicle image not found",
   PROFILE_NOT_FOUND: "Profile not found",
   PROFILE_IMAGE_NOT_FOUND: "Profile image not found",
+  PROFILE_PICTURE_REMOVED: "Profile picture removed successfully",
   RIDE_CREATED: "Your ride has been created successfully",
   AVAILABLE_RIDES_FETCHED: "Available rides list is fetched successfully",
   VEHICLES_FETCHED_SUCCESSFULLY: "Vehicles are fetched successfully",
@@ -40,6 +42,8 @@ const responseMessages = {
   INCORRECT_OLD_PASSWORD: "Incorrect old password",
   RIDE_STATUS_ACCEPTED: "Your ride has been accepted",
   RIDE_STATUS_REJECTED: "Your ride has been rejected",
+  RIDES_LIST_FETCHED: "Rides list is fetched successfully",
+  RIDES_NOT_FOUND: "Rides not found",
   CREATED_RIDE_REQUESTS_NOT_FOUND:
     "You don't have any request for your created rides.",
   CREATED_RIDE_REQUESTS_LIST_FETCHED:
@@ -53,7 +57,7 @@ const responseMessages = {
   RIDE_REQUEST_CREATED: "Ride request created successfully",
   RIDE_REQUEST_ALREADY_CREATED:
     "You've already created an alert for this ride and date.",
-  RIDE_REQUEST_CANCELLED: "Your ride request is cancelled"
+  RIDE_REQUEST_CANCELLED: "Your ride request is cancelled",
 };
 
 module.exports = responseMessages;

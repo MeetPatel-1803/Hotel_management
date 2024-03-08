@@ -17,6 +17,7 @@ module.exports = {
           model: "users",
           key: "id",
         },
+        onDelete: "CASCADE",
       },
       source_address: {
         type: DataTypes.STRING,

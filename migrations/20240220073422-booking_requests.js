@@ -23,6 +23,7 @@ module.exports = {
           model: "users",
           key: "id",
         },
+        onDelete: "CASCADE",
       },
       trip_id: {
         type: DataTypes.INTEGER,
@@ -30,6 +31,7 @@ module.exports = {
           model: "trips",
           key: "id",
         },
+        onDelete: "CASCADE",
       },
       trip_status: {
         type: DataTypes.ENUM,

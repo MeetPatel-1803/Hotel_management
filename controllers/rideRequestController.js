@@ -28,7 +28,7 @@ const addEditRideRequest = async (req, res) => {
 
     addEditRideRequestValidation(reqParams, res, async (validate) => {
       if (validate) {
-        let filterCondition = {
+        const filterCondition = {
           source_address: reqParams.sourceAddress,
           source_lat: reqParams.sourceLat,
           source_long: reqParams.sourceLong,
@@ -39,6 +39,7 @@ const addEditRideRequest = async (req, res) => {
           departure_time: reqParams.departureTime,
           no_of_passenger: reqParams.noOfPassenger,
         };
+
         if (reqParams.rideRequestId) {
           const requestExist = await tripRequest.findOne({
             where: { id: reqParams.rideRequestId },
@@ -48,10 +49,9 @@ const addEditRideRequest = async (req, res) => {
             return errorResponseData(res, RIDE_REQUEST_NOT_EXIST);
           }
 
-          await tripRequest.update(
-            { filterCondition },
-            { where: { id: reqParams.rideRequestId } }
-          );
+          await tripRequest.update(filterCondition, {
+            where: { id: reqParams.rideRequestId },
+          });
 
           const updatedRideRequest = await tripRequest.findOne({
             where: { id: reqParams.rideRequestId },
@@ -107,7 +107,7 @@ const cancelRideRequest = async (req, res) => {
 
     cancelRideRequestValidation(reqParams, res, async (validate) => {
       if (validate) {
-        const existRequest = await bookingRequests.findOne({
+        const existRequest = await tripRequest.findOne({
           where: { id: reqParams.trip_request_id },
         });
 

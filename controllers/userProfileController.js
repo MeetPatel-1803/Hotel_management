@@ -9,11 +9,13 @@ const {
   IMAGE_UPLOADED,
   PROFILE_IMAGE_NOT_FOUND,
   PROFILE_UPDATED,
+  PROFILE_PICTURE_REMOVED,
 } = require("../utils/message");
 const {
   responseSuccessWithMessage,
   errorResponseWithoutData,
   errorResponseData,
+  successResponseWithoutData,
 } = require("../utils/response");
 const {
   generatePreSignedUrl,
@@ -40,9 +42,17 @@ const getProfile = async (req, res) => {
     }
 
     const file = profileDetail.profile_picture;
+    if (file == null) {
+      return responseSuccessWithMessage(
+        res,
+        { profileDetail },
+        USER_PROFILE_FETCHED,
+        (code = 1)
+      );
+    }
     const imageUrl = fetchPreSignedUrl(file);
 
-    responseSuccessWithMessage(
+    return responseSuccessWithMessage(
       res,
       { profileDetail, imageUrl },
       USER_PROFILE_FETCHED,
@@ -194,11 +204,13 @@ const removeProfilePicture = async (req, res) => {
 
     await profile.update(
       { profile_picture: null },
-      { where: { profile_picture: profileImage.profile_picture } }
+      { where: { id: reqParams.id } }
     );
 
     const file = `${process.env.FILE_PATH_PROFILE}/${profileImage.profile_picture}`;
     removeOldImage(process.env.AWS_BUCKET_NAME, file, res);
+
+    return successResponseWithoutData(res, PROFILE_PICTURE_REMOVED);
   } catch (error) {
     return errorResponseData(res, error, 400);
   }
