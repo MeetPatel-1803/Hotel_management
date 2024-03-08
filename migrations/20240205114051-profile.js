@@ -20,6 +20,7 @@ module.exports = {
           model: "users",
           key: "id",
         },
+        onDelete: "CASCADE",
       },
       vehicle_id: {
         type: DataTypes.INTEGER,
@@ -27,6 +28,7 @@ module.exports = {
           model: "vehicles",
           key: "id",
         },
+        onDelete: "CASCADE",
       },
       first_name: {
         type: DataTypes.STRING(50),

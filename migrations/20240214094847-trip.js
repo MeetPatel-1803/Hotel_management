@@ -20,6 +20,8 @@ module.exports = {
           model: "users",
           key: "id",
         },
+        onDelete: "CASCADE",
+        onUpdate: "RESTRICT",
       },
       vehicle_id: {
         type: DataTypes.INTEGER,
@@ -27,6 +29,8 @@ module.exports = {
           model: "vehicles",
           key: "id",
         },
+        onDelete: "CASCADE",
+        onUpdate: "RESTRICT",
       },
       source_address: {
         type: DataTypes.STRING,
@@ -63,7 +67,7 @@ module.exports = {
       available_seats: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue:0
+        defaultValue: 0,
       },
       fare: {
         type: DataTypes.DECIMAL(20, 10),
