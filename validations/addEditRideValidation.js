@@ -13,7 +13,7 @@ const { MAX_NO_OF_PASSANGER } = require("../constants/constants");
 const addEditRideValidation = (req, res, callback) => {
   const schema = Joi.object({
     vehicleId: Joi.number(),
-    trip_id:Joi.number(),
+    tripId:Joi.number(),
     cancelOfferRide:Joi.boolean(),
     sourceAddress: Joi.string().trim().required(),
     sourceLat: Joi.number().min(-90).max(90).precision(2).required(),

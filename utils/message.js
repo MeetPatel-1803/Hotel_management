@@ -42,6 +42,8 @@ const responseMessages = {
   INCORRECT_OLD_PASSWORD: "Incorrect old password",
   RIDE_STATUS_ACCEPTED: "Your ride has been accepted",
   RIDE_STATUS_REJECTED: "Your ride has been rejected",
+  RIDES_LIST_FETCHED: "Rides list is fetched successfully",
+  RIDES_NOT_FOUND: "Rides not found",
   CREATED_RIDE_REQUESTS_NOT_FOUND:
     "You don't have any request for your created rides.",
   CREATED_RIDE_REQUESTS_LIST_FETCHED:

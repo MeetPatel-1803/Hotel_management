@@ -186,21 +186,20 @@ const availableRidesList = async (req, res) => {
                   },
                 }
               : { available_seats: { [Op.gte]: 1 } }),
-            ...(reqParams.fareMin && reqParams.fareMax
-              ? {
-                  fare: {
-                    [Op.gte]: reqParams.fareMin,
-                    [Op.lte]: reqParams.fareMax,
-                  },
-                }
-              : { fare: { [Op.gte]: 0, [Op.lte]: 500 } }),
+            ...(reqParams.fareMin &&
+              reqParams.fareMax && {
+                fare: {
+                  [Op.gte]: reqParams.fareMin,
+                  [Op.lte]: reqParams.fareMax,
+                },
+              }),
           },
           order: sortingOrder,
           limit: perPage,
           offset: pageItems,
         });
 
-        if (listOfRides.length == null) {
+        if (!listOfRides.rows.length) {
           return responseSuccessWithMessage(res, listOfRides, NO_RIDES_FOUND);
         }
 
@@ -209,9 +208,7 @@ const availableRidesList = async (req, res) => {
           listOfRides.rows,
           AVAILABLE_RIDES_FETCHED,
           1,
-          page,
-          perPage,
-          { totalCount: listOfRides.count }
+          { page, perPage, totalCount: listOfRides.count }
         );
       }
     });
