@@ -23,6 +23,7 @@ const responseMessages = {
   VEHICLE_IMAGE_NOT_FOUND: "Vehicle image not found",
   PROFILE_NOT_FOUND: "Profile not found",
   PROFILE_IMAGE_NOT_FOUND: "Profile image not found",
+  PROFILE_PICTURE_REMOVED: "Profile picture removed successfully",
   RIDE_CREATED: "Your ride has been created successfully",
   AVAILABLE_RIDES_FETCHED: "Available rides list is fetched successfully",
   VEHICLES_FETCHED_SUCCESSFULLY: "Vehicles are fetched successfully",
