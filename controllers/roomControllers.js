@@ -1,8 +1,11 @@
 const { createRoomValidation } = require("../validations/roomValidations");
 const sequelize = require("../config/database.js");
 const { Room } = require("../models/index.js");
-const { ROOM_ALREADY_EXIST } = require("../utils/message.js");
-const { errorResponseData } = require("../utils/response.js");
+const { ROOM_ALREADY_EXIST, ROOM_CREATED } = require("../utils/message.js");
+const {
+  errorResponseData,
+  responseSuccessWithMessage,
+} = require("../utils/response.js");
 const { META_CODE } = require("../utils/constant.js");
 
 const createRoom = async (req, res) => {
@@ -26,8 +29,15 @@ const createRoom = async (req, res) => {
             price: reqParam.price,
             status: reqParam.status,
           });
-
           // ------ IMAGE FUNCTIONALITY ------
+
+          await transaction.commit();
+          return responseSuccessWithMessage(
+            res,
+            room,
+            ROOM_CREATED,
+            META_CODE.SUCCESS
+          );
         }
       }
     });
@@ -35,4 +45,8 @@ const createRoom = async (req, res) => {
     await transaction.rollback();
     return errorResponseData(res, error.message);
   }
+};
+
+module.exports = {
+  createRoom,
 };
