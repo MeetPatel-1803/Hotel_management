@@ -14,4 +14,7 @@ module.exports = {
     FAIL: 0,
     SUCCESS: 1,
   },
+  STATUS_CODE: {
+    NOT_FOUND: 404,
+  },
 };
