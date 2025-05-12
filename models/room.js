@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database.js");
-const { ROOM_TYPES } = require("../utils/constant.js");
+const { ROOM_TYPES, ROOM_STATUS } = require("../utils/constant.js");
 
 const roomSchema = sequelize.define("room", {
   id: {
@@ -15,7 +15,7 @@ const roomSchema = sequelize.define("room", {
     unique: true,
   },
   type: {
-    type: DataTypes.ENUM,
+    type: DataTypes.STRING,
     allowNull: false,
     values: Object.values(ROOM_TYPES),
     defaultValue: ROOM_TYPES.DELUX,
@@ -28,7 +28,8 @@ const roomSchema = sequelize.define("room", {
   status: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: "available",
+    values: Object.values(ROOM_STATUS),
+    defaultValue: ROOM_STATUS.AVAILABLE,
   },
   image: {
     type: DataTypes.STRING,

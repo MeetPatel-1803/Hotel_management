@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const sequelize = require("./config/database");
+const routes = require("./routes/index.js");
 
 dotenv.config();
 
@@ -18,6 +19,8 @@ try {
 }
 
 const app = express();
+app.use(express.json());
+app.use("/", routes);
 
 const port = process.env.PORT || 3000;
 
