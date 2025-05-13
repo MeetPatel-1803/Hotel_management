@@ -17,4 +17,9 @@ module.exports = {
   STATUS_CODE: {
     NOT_FOUND: 404,
   },
+  PAGINATION: {
+    PAGE: 1,
+    PER_PAGE: 10,
+    MAXIMUM_PER_PAGE: 100,
+  },
 };

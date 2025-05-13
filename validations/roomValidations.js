@@ -3,6 +3,7 @@ const {
   ROOM_TYPES,
   ROOM_STATUS,
   IMAGE_MIMETYPE,
+  PAGINATION,
 } = require("../utils/constant");
 const { errorResponseData } = require("../utils/response");
 
@@ -49,10 +50,39 @@ const deleteRoomValidation = (req, res, mext) => {
   const schema = Joi.object({
     roomId: Joi.number().required(),
   });
+  const { error } = schema.validate(req);
+  if (error) {
+    return errorResponseData(res, error.message, 401);
+  } else {
+    return callback(true);
+  }
+};
+
+const getAllRoomsValidation = (req, res, next) => {
+  const schema = Joi.object({
+    roomId: Joi.number(),
+    page: Joi.number().allow(""),
+    perPage: Joi.number().max(PAGINATION.MAXIMUM_PER_PAGE).allow("").optional(),
+    sortBy: Joi.string().allow("").optional(),
+    sortType: Joi.string().valid("ASC", "DESC").optional().allow(""),
+    minPrice: Joi.number().precision(2),
+    maxPrice: Joi.number().precision(2),
+    roomType: Joi.string()
+      .valid(Object.values(ROOM_TYPES))
+      .optional()
+      .allow(""),
+  });
+  const { error } = schema.validate(req);
+  if (error) {
+    return errorResponseData(res, error.message, 401);
+  } else {
+    return callback(true);
+  }
 };
 
 module.exports = {
   createRoomValidation,
   updateRoomValidation,
   deleteRoomValidation,
+  getAllRoomsValidation,
 };

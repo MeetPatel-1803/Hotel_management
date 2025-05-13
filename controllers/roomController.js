@@ -2,7 +2,8 @@ const {
   createRoomValidation,
   updateRoomValidation,
   deleteRoomValidation,
-} = require("../validations/roomValidations");
+  getAllRoomsValidation,
+} = require("../validations/roomValidations.js");
 const sequelize = require("../config/database.js");
 const { Room } = require("../models/index.js");
 const {
@@ -11,6 +12,8 @@ const {
   ROOM_NOT_EXIST,
   ROOM_UPDATED,
   ROOM_DELETED,
+  ROOMS_NOT_FOUND,
+  ROOM_FETCHED,
 } = require("../utils/message.js");
 const {
   errorResponseData,
@@ -18,7 +21,14 @@ const {
   errorResponseWithoutData,
   successResponseWithoutData,
 } = require("../utils/response.js");
-const { META_CODE, STATUS_CODE } = require("../utils/constant.js");
+const {
+  META_CODE,
+  STATUS_CODE,
+  PAGINATION,
+  ROOM_TYPES,
+  ROOM_STATUS,
+} = require("../utils/constant.js");
+const { Op } = require("sequelize");
 
 const createRoom = async (req, res) => {
   try {
@@ -141,23 +151,89 @@ const deleteRoom = async (req, res) => {
   }
 };
 
-const getAllRooms = async (req, res) => {
+const getRooms = async (req, res) => {
   try {
-    const rooms = await Room.findAll({
-      where: { status: ROOM_STATUS.AVAILABLE },
+    const reqParam = req.query;
+    await getAllRoomsValidation(reqParam, res, async (validate) => {
+      if (validate) {
+        if (reqParam.roomId) {
+          const roomDetail = await Room.findById(reqParam.roomId);
+
+          if (!roomDetail) {
+            return errorResponseWithoutData(
+              res,
+              ROOM_NOT_EXIST,
+              META_CODE.FAIL
+            );
+          }
+
+          return responseSuccessWithMessage(
+            res,
+            roomDetail,
+            ROOM_FETCHED,
+            META_CODE.SUCCESS
+          );
+        } else {
+          const page = reqParam.page
+            ? parseInt(reqParam.page)
+            : PAGINATION.PAGE;
+
+          const perPage = reqParam.perPage
+            ? parseInt(reqParam.perPage)
+            : PAGINATION.PER_PAGE;
+
+          const offset = (page - 1) * perPage;
+
+          let sortingOrder = [["created_at", "DESC"]];
+
+          if (reqParam.sortBy && reqParam.sortType) {
+            sortingOrder = [[reqParam.sortBy, reqParam.sortType]];
+          }
+
+          const rooms = await Room.findAndCountAll({
+            where: {
+              ...(reqParam.minPrice && { price: { [Op.gte]: reqParam.price } }),
+              ...(reqParam.maxPrice && { price: { [Op.lte]: reqParam.price } }),
+              ...(reqParam.roomType && { type: reqParam.roomType }),
+              status: ROOM_STATUS.AVAILABLE,
+            },
+            order: sortingOrder,
+            limit: perPage,
+            offset,
+          });
+
+          if (!rooms.rows.length) {
+            return errorResponseWithoutData(res, rooms, ROOMS_NOT_FOUND);
+          }
+
+          return responseSuccessWithMessage(
+            res,
+            rooms,
+            ROOM_FETCHED,
+            META_CODE.SUCCESS,
+            { page, perPage, totalCount: listOfRides.count }
+          );
+        }
+      }
     });
-
-    // pagination
-
-    // sorting
   } catch (error) {
-    await transaction.rollback();
     return errorResponseData(res, error.message);
   }
 };
+
+// const getRoomById = async (req, res) => {
+//   try {
+//     const reqParam = req.query
+
+//     await
+//   } catch (error) {
+//     return errorResponseData(res, error.message);
+//   }
+// };
 
 module.exports = {
   createRoom,
   updateRoom,
   deleteRoom,
+  getRooms,
 };
