@@ -31,9 +31,8 @@ const {
 const { Op } = require("sequelize");
 
 const createRoom = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    const transaction = await sequelize.transaction();
-
     const reqParam = req.body;
 
     await createRoomValidation(reqParam, res, async (validate) => {
@@ -43,7 +42,11 @@ const createRoom = async (req, res) => {
         });
 
         if (roomDetail) {
-          return errorResponseData(res, ROOM_ALREADY_EXIST, META_CODE.FAIL);
+          return errorResponseWithoutData(
+            res,
+            ROOM_ALREADY_EXIST,
+            META_CODE.FAIL
+          );
         } else {
           const room = await Room.create({
             number: reqParam.number,
@@ -70,9 +73,8 @@ const createRoom = async (req, res) => {
 };
 
 const updateRoom = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    const transaction = await sequelize.transaction();
-
     const reqParam = req.body;
 
     await updateRoomValidation(reqParam, res, async (validate) => {
@@ -220,16 +222,6 @@ const getRooms = async (req, res) => {
     return errorResponseData(res, error.message);
   }
 };
-
-// const getRoomById = async (req, res) => {
-//   try {
-//     const reqParam = req.query
-
-//     await
-//   } catch (error) {
-//     return errorResponseData(res, error.message);
-//   }
-// };
 
 module.exports = {
   createRoom,

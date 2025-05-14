@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database.js");
 const { ROOM_TYPES, ROOM_STATUS } = require("../utils/constant.js");
 
-const roomSchema = sequelize.define("room", {
+const roomSchema = sequelize.define("rooms", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -33,7 +33,7 @@ const roomSchema = sequelize.define("room", {
   },
   image: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
 });
 
