@@ -13,10 +13,15 @@ const createRoomValidation = (req, res, callback) => {
     number: Joi.string()
       .pattern(/^\d{3}$/)
       .required(),
-    type: Joi.string().valid("delux").required(),
+    type: Joi.string()
+      .insensitive()
+      .valid(...Object.values(ROOM_TYPES))
+      .required(),
     price: Joi.number().min(0).precision(2).required(),
-    status: Joi.string().valid("available").required(),
-    // image: Joi.string().optional().pattern(pattern),
+    status: Joi.string()
+      .valid(...Object.values(ROOM_STATUS))
+      .required(),
+    image: Joi.string().optional().pattern(pattern),
   });
   const { error } = schema.validate(req);
   if (error) {
@@ -33,9 +38,13 @@ const updateRoomValidation = (req, res, callback) => {
     number: Joi.string()
       .pattern(/^\d{3}$/)
       .required(),
-    // type: Joi.string().valid(Object.values(ROOM_TYPES)).required(),
+    type: Joi.string()
+      .valid(...Object.values(ROOM_TYPES))
+      .required(),
     price: Joi.number().min(0).precision(2).required(),
-    // status: Joi.string().valid(Object.values(ROOM_STATUS)).required(),
+    status: Joi.string()
+      .valid(...Object.values(ROOM_STATUS))
+      .required(),
     image: Joi.string().optional().pattern(pattern),
   });
   const { error } = schema.validate(req);
@@ -68,7 +77,7 @@ const getAllRoomsValidation = (req, res, callback) => {
     minPrice: Joi.number().precision(2),
     maxPrice: Joi.number().precision(2),
     roomType: Joi.string()
-      .valid(Object.values(ROOM_TYPES))
+      .valid(...Object.values(ROOM_TYPES))
       .optional()
       .allow(""),
   });

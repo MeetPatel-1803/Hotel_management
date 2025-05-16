@@ -41,6 +41,14 @@ const bookingSchema = sequelize.define("booking", {
     allowNull: false,
     defaultValue: "pending",
   },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
 });
 
 module.exports = bookingSchema;

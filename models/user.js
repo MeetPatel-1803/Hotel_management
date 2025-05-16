@@ -30,6 +30,14 @@ const userSchema = sequelize.define("user", {
     allowNull: false,
     defaultValue: "user",
   },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
 });
 
 module.exports = userSchema;

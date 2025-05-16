@@ -35,6 +35,14 @@ const roomSchema = sequelize.define("rooms", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
 });
 
 module.exports = roomSchema;

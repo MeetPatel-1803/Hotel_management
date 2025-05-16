@@ -123,17 +123,19 @@ const updateRoom = async (req, res) => {
 };
 
 const deleteRoom = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    const transaction = await sequelize.transaction();
-
     const reqParam = req.body;
 
     await deleteRoomValidation(reqParam, res, async (validate) => {
       if (validate) {
-        const roomDetail = await Room.findById(reqParam.roomId);
-
+        const roomDetail = await Room.findOne({
+          where: { id: reqParam.roomId },
+        });
         if (roomDetail) {
-          await Room.destroy({ where: { id: reqParam.roomId } });
+          await Room.destroy({
+            where: { id: reqParam.roomId },
+          });
 
           await transaction.commit();
 
@@ -159,7 +161,9 @@ const getRooms = async (req, res) => {
     await getAllRoomsValidation(reqParam, res, async (validate) => {
       if (validate) {
         if (reqParam.roomId) {
-          const roomDetail = await Room.findById(reqParam.roomId);
+          const roomDetail = await Room.findOne({
+            where: { id: reqParam.roomId },
+          });
 
           if (!roomDetail) {
             return errorResponseWithoutData(
