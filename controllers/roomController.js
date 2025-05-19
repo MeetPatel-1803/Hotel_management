@@ -2,7 +2,8 @@ const {
   createRoomValidation,
   updateRoomValidation,
   deleteRoomValidation,
-} = require("../validations/roomValidations");
+  getAllRoomsValidation,
+} = require("../validations/roomValidations.js");
 const sequelize = require("../config/database.js");
 const { Room } = require("../models/index.js");
 const {
@@ -11,6 +12,8 @@ const {
   ROOM_NOT_EXIST,
   ROOM_UPDATED,
   ROOM_DELETED,
+  ROOMS_NOT_FOUND,
+  ROOM_FETCHED,
 } = require("../utils/message.js");
 const {
   errorResponseData,
@@ -18,12 +21,20 @@ const {
   errorResponseWithoutData,
   successResponseWithoutData,
 } = require("../utils/response.js");
-const { META_CODE, STATUS_CODE } = require("../utils/constant.js");
+const {
+  META_CODE,
+  STATUS_CODE,
+  PAGINATION,
+  ROOM_STATUS,
+} = require("../utils/constant.js");
+const { Op } = require("sequelize");
+const { config } = require("dotenv");
+
+config();
 
 const createRoom = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    const transaction = await sequelize.transaction();
-
     const reqParam = req.body;
 
     await createRoomValidation(reqParam, res, async (validate) => {
@@ -33,11 +44,15 @@ const createRoom = async (req, res) => {
         });
 
         if (roomDetail) {
-          return errorResponseData(res, ROOM_ALREADY_EXIST, META_CODE.FAIL);
+          return errorResponseWithoutData(
+            res,
+            ROOM_ALREADY_EXIST,
+            META_CODE.FAIL
+          );
         } else {
           const room = await Room.create({
             number: reqParam.number,
-            type: reqParam.type,
+            type: reqParam.type.toLowerCase(),
             price: reqParam.price,
             status: reqParam.status,
           });
@@ -60,14 +75,15 @@ const createRoom = async (req, res) => {
 };
 
 const updateRoom = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    const transaction = await sequelize.transaction();
-
     const reqParam = req.body;
 
     await updateRoomValidation(reqParam, res, async (validate) => {
       if (validate) {
-        const roomDetail = await Room.findById(reqParam.roomId);
+        const roomDetail = await Room.findOne({
+          where: { id: reqParam.roomId },
+        });
 
         if (!roomDetail) {
           return errorResponseWithoutData(
@@ -80,7 +96,7 @@ const updateRoom = async (req, res) => {
           await Room.update(
             {
               ...(reqParam.number && { number: reqParam.number }),
-              ...(reqParam.type && { type: reqParam.type }),
+              ...(reqParam.type && { type: reqParam.type.toLowerCase() }),
               ...(reqParam.price && { price: reqParam.price }),
               ...(reqParam.status && { status: reqParam.status }),
             },
@@ -111,17 +127,19 @@ const updateRoom = async (req, res) => {
 };
 
 const deleteRoom = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    const transaction = await sequelize.transaction();
-
     const reqParam = req.body;
 
     await deleteRoomValidation(reqParam, res, async (validate) => {
       if (validate) {
-        const roomDetail = await Room.findById(reqParam.roomId);
-
+        const roomDetail = await Room.findOne({
+          where: { id: reqParam.roomId },
+        });
         if (roomDetail) {
-          await Room.destroy({ where: { id: reqParam.roomId } });
+          await Room.destroy({
+            where: { id: reqParam.roomId },
+          });
 
           await transaction.commit();
 
@@ -141,17 +159,80 @@ const deleteRoom = async (req, res) => {
   }
 };
 
-const getAllRooms = async (req, res) => {
+const getRooms = async (req, res) => {
   try {
-    const rooms = await Room.findAll({
-      where: { status: ROOM_STATUS.AVAILABLE },
+    const reqParam = req.query;
+    await getAllRoomsValidation(reqParam, res, async (validate) => {
+      if (validate) {
+        if (reqParam.roomId) {
+          const roomDetail = await Room.findOne({
+            where: { id: reqParam.roomId },
+          });
+
+          if (!roomDetail) {
+            return errorResponseWithoutData(
+              res,
+              ROOM_NOT_EXIST,
+              META_CODE.FAIL
+            );
+          }
+
+          return responseSuccessWithMessage(
+            res,
+            roomDetail,
+            ROOM_FETCHED,
+            META_CODE.SUCCESS
+          );
+        } else {
+          const page = reqParam.page
+            ? parseInt(reqParam.page)
+            : PAGINATION.PAGE;
+
+          const perPage = reqParam.perPage
+            ? parseInt(reqParam.perPage)
+            : PAGINATION.PER_PAGE;
+
+          const offset = (page - 1) * perPage;
+
+          let sortingOrder = [["createdAt", "DESC"]];
+
+          if (reqParam.sortBy && reqParam.sortType) {
+            sortingOrder = [[reqParam.sortBy, reqParam.sortType]];
+          }
+
+          const rooms = await Room.findAndCountAll({
+            where: {
+              ...(reqParam.minPrice && {
+                price: { [Op.gte]: reqParam.minPrice },
+              }),
+              ...(reqParam.maxPrice && {
+                price: { [Op.lte]: reqParam.maxPrice },
+              }),
+              ...(reqParam.roomType && {
+                type: reqParam.roomType.toLowerCase(),
+              }),
+              status: ROOM_STATUS.AVAILABLE,
+            },
+            order: sortingOrder,
+            limit: perPage,
+            offset,
+          });
+
+          if (!rooms.rows.length) {
+            return errorResponseWithoutData(res, rooms, ROOMS_NOT_FOUND);
+          }
+
+          return responseSuccessWithMessage(
+            res,
+            rooms,
+            ROOM_FETCHED,
+            META_CODE.SUCCESS,
+            { page, perPage, totalCount: rooms.count }
+          );
+        }
+      }
     });
-
-    // pagination
-
-    // sorting
   } catch (error) {
-    await transaction.rollback();
     return errorResponseData(res, error.message);
   }
 };
@@ -160,4 +241,5 @@ module.exports = {
   createRoom,
   updateRoom,
   deleteRoom,
+  getRooms,
 };
