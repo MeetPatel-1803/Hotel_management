@@ -35,11 +35,11 @@ const roomSchema = sequelize.define("rooms", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  created_at: {
+  createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
   },
-  updated_at: {
+  updatedAt: {
     type: DataTypes.DATE,
     allowNull: false,
   },

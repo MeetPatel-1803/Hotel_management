@@ -35,16 +35,10 @@ const updateRoomValidation = (req, res, callback) => {
   const pattern = new RegExp(`/^[A-Za-z0-9-_]+\/${IMAGE_MIMETYPE.join("|")}$/`);
   const schema = Joi.object({
     roomId: Joi.number().required(),
-    number: Joi.string()
-      .pattern(/^\d{3}$/)
-      .required(),
-    type: Joi.string()
-      .valid(...Object.values(ROOM_TYPES))
-      .required(),
-    price: Joi.number().min(0).precision(2).required(),
-    status: Joi.string()
-      .valid(...Object.values(ROOM_STATUS))
-      .required(),
+    number: Joi.string().pattern(/^\d{3}$/),
+    type: Joi.string().valid(...Object.values(ROOM_TYPES)),
+    price: Joi.number().min(0).precision(2),
+    status: Joi.string().valid(...Object.values(ROOM_STATUS)),
     image: Joi.string().optional().pattern(pattern),
   });
   const { error } = schema.validate(req);
@@ -72,13 +66,17 @@ const getAllRoomsValidation = (req, res, callback) => {
     roomId: Joi.number(),
     page: Joi.number().allow(""),
     perPage: Joi.number().max(PAGINATION.MAXIMUM_PER_PAGE).allow("").optional(),
-    sortBy: Joi.string().allow("").optional(),
+    sortBy: Joi.string()
+      .allow("")
+      .valid("createdAt", "updatedAt", "price")
+      .optional(),
     sortType: Joi.string().valid("ASC", "DESC").optional().allow(""),
     minPrice: Joi.number().precision(2),
     maxPrice: Joi.number().precision(2),
     roomType: Joi.string()
       .valid(...Object.values(ROOM_TYPES))
       .optional()
+      .insensitive()
       .allow(""),
   });
   const { error } = schema.validate(req);

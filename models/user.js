@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database.js");
+const { USER_ROLE } = require("../utils/constant.js");
 
 const userSchema = sequelize.define("user", {
   id: {
@@ -28,7 +29,7 @@ const userSchema = sequelize.define("user", {
   role: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: "user",
+    defaultValue: USER_ROLE.USER,
   },
   created_at: {
     type: DataTypes.DATE,

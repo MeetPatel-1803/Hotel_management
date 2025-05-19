@@ -50,7 +50,7 @@ const createRoom = async (req, res) => {
         } else {
           const room = await Room.create({
             number: reqParam.number,
-            type: reqParam.type,
+            type: reqParam.type.toLowerCase(),
             price: reqParam.price,
             status: reqParam.status,
           });
@@ -79,7 +79,9 @@ const updateRoom = async (req, res) => {
 
     await updateRoomValidation(reqParam, res, async (validate) => {
       if (validate) {
-        const roomDetail = await Room.findById(reqParam.roomId);
+        const roomDetail = await Room.findOne({
+          where: { id: reqParam.roomId },
+        });
 
         if (!roomDetail) {
           return errorResponseWithoutData(
@@ -92,7 +94,7 @@ const updateRoom = async (req, res) => {
           await Room.update(
             {
               ...(reqParam.number && { number: reqParam.number }),
-              ...(reqParam.type && { type: reqParam.type }),
+              ...(reqParam.type && { type: reqParam.type.toLowerCase() }),
               ...(reqParam.price && { price: reqParam.price }),
               ...(reqParam.status && { status: reqParam.status }),
             },
@@ -190,7 +192,7 @@ const getRooms = async (req, res) => {
 
           const offset = (page - 1) * perPage;
 
-          let sortingOrder = [["created_at", "DESC"]];
+          let sortingOrder = [["createdAt", "DESC"]];
 
           if (reqParam.sortBy && reqParam.sortType) {
             sortingOrder = [[reqParam.sortBy, reqParam.sortType]];
@@ -198,9 +200,15 @@ const getRooms = async (req, res) => {
 
           const rooms = await Room.findAndCountAll({
             where: {
-              ...(reqParam.minPrice && { price: { [Op.gte]: reqParam.price } }),
-              ...(reqParam.maxPrice && { price: { [Op.lte]: reqParam.price } }),
-              ...(reqParam.roomType && { type: reqParam.roomType }),
+              ...(reqParam.minPrice && {
+                price: { [Op.gte]: reqParam.minPrice },
+              }),
+              ...(reqParam.maxPrice && {
+                price: { [Op.lte]: reqParam.maxPrice },
+              }),
+              ...(reqParam.roomType && {
+                type: reqParam.roomType.toLowerCase(),
+              }),
               status: ROOM_STATUS.AVAILABLE,
             },
             order: sortingOrder,
@@ -217,7 +225,7 @@ const getRooms = async (req, res) => {
             rooms,
             ROOM_FETCHED,
             META_CODE.SUCCESS,
-            { page, perPage, totalCount: listOfRides.count }
+            { page, perPage, totalCount: rooms.count }
           );
         }
       }

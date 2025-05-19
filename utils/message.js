@@ -6,4 +6,7 @@ module.exports = {
   ROOM_DELETED: "Room deleted.",
   ROOMS_NOT_FOUND: "There are no rooms avalibale as per your search.",
   ROOM_FETCHED: "Rooms fetched successfully.",
+  EMAIL_ALREADY_TAKEN: "Email is already taken",
+  UNAUTHORIZED_USER: "Unauthorized - User not found",
+  USER_REGISTERED: "User Registered Successfully",
 };

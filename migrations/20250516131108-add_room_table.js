@@ -1,6 +1,7 @@
 "use strict";
 
-const { ROOM_STATUS } = require("../utils/constant");
+const { DataTypes } = require("sequelize");
+const { ROOM_STATUS, ROOM_TYPES } = require("../utils/constant");
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -38,11 +39,11 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      created_at: {
+      createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
       },
-      updated_at: {
+      updatedAt: {
         type: DataTypes.DATE,
         allowNull: false,
       },
