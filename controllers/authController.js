@@ -1,18 +1,34 @@
 const { User } = require("../models");
+const sendResetEmail = require("../services/emailService.js");
+const { generateJWTToken } = require("../services/jwtService");
 const { META_CODE, STATUS_CODE } = require("../utils/constant");
+const { randomTokens } = require("../utils/helper.js");
 const {
   EMAIL_ALREADY_TAKEN,
   UNAUTHORIZED_USER,
   USER_REGISTERED,
+  INCORRECT_PASSWORD,
+  LOGIN_SUCCESSFUL,
+  INCORRECT_MAIL,
+  RESET_LINK_SET_SUCCESSFULLY,
+  MAIL_NOT_REGISTERED,
+  TOKEN_EXPIRED,
+  INCORRECT_TOKEN,
+  PASSWORD_UPDATED,
 } = require("../utils/message");
 const {
   errorResponseWithoutData,
   responseSuccessWithMessage,
+  successResponseWithoutData,
 } = require("../utils/response");
 const {
   registrationValidation,
   loginValidation,
+  passwordValidation,
 } = require("../validations/authValidations");
+const { config } = require("dotenv");
+
+config();
 
 const register = async (req, res) => {
   const reqParam = req.body;
@@ -62,7 +78,7 @@ const login = async (req, res) => {
   const reqParam = req.body;
   loginValidation(reqParam, res, async (validate) => {
     if (validate) {
-      const userDetail = await user.findOne({
+      const userDetail = await User.findOne({
         where: {
           email: reqParam.email,
         },
@@ -76,36 +92,35 @@ const login = async (req, res) => {
           STATUS_CODE.UNAUTHORIZED
         );
       } else {
-        const profileData = await User.findOne({
-          where: {
-            user_id: userDetail.id,
-          },
-        });
-
         bcrypt.compare(
           reqParam.password,
           userDetail.password,
           (err, isValid) => {
             if (err) {
-              return errorResponseWithoutData(res, err);
+              return errorResponseWithoutData(res, err, META_CODE.FAIL);
             } else if (!isValid) {
-              return errorResponseData(res, INCORRECT_PASSWORD, 400);
+              return errorResponseWithoutData(
+                res,
+                INCORRECT_PASSWORD,
+                META_CODE.FAIL,
+                STATUS_CODE.BAD_REQUEST
+              );
             } else {
-              const token = generateJWTToken(userDetail.id, res);
+              const token = generateJWTToken(
+                {
+                  id: userDetail.id,
+                  email: userDetail.email,
+                  role: userDetail.role,
+                },
+                res
+              );
 
-              if (profileData) {
-                responseSuccessWithMessage(
-                  res,
-                  { isProfileCreated: true, token: token },
-                  LOGIN_SUCCESSFUL
-                );
-              } else {
-                responseSuccessWithMessage(
-                  res,
-                  { isProfileCreated: false, token: token },
-                  LOGIN_SUCCESSFUL
-                );
-              }
+              return responseSuccessWithMessage(
+                res,
+                { userDetail, token: token },
+                LOGIN_SUCCESSFUL,
+                META_CODE.SUCCESS
+              );
             }
           }
         );
@@ -117,7 +132,7 @@ const login = async (req, res) => {
 const forgotPassword = async (req, res) => {
   const reqParam = req.body;
 
-  const userDetail = await user.findOne({
+  const userDetail = await User.findOne({
     where: {
       email: reqParam.email,
     },
@@ -136,40 +151,57 @@ const forgotPassword = async (req, res) => {
       d.getMilliseconds()
     );
 
-    const setToken = await user.update(
+    const setToken = await User.update(
       { Token: token, token_expire: tokenExpire },
       { where: { email: reqParam.email } }
     );
 
     if (!setToken) {
-      return errorResponseData(res, INCORRECT_MAIL, 498);
+      return errorResponseWithoutData(
+        res,
+        INCORRECT_MAIL,
+        META_CODE.FAIL,
+        STATUS_CODE.INVALID_TOKEN
+      );
     } else {
       const resetPasswordUrl = `http://${process.env.FRONTEND_URL}/reset-password?tokenId=${token}`;
 
-      const transporter = nodemailer.createTransport({
-        host: process.env.HOST_SERVICE,
-        port: process.env.SERVICE_PORT,
-        secure: false,
-        auth: {
-          user: process.env.MAIL_USER,
-          pass: process.env.MAIL_PASSWORD,
-        },
-      });
-      try {
-        await transporter.sendMail({
-          from: process.env.MAIL_USER,
-          to: reqParam.email,
-          subject: "RESET PASSWORD",
-          html: `${resetPasswordUrl}`,
-        });
-      } catch (error) {
-        errorResponseWithoutData(res, error);
-      }
+      sendResetEmail(reqParam.email, resetPasswordUrl);
 
-      responseSuccessWithMessage(res, resetPasswordUrl, token);
+      // const transporter = nodemailer.createTransport({
+      //   host: process.env.HOST_SERVICE,
+      //   port: process.env.SERVICE_PORT,
+      //   secure: false,
+      //   auth: {
+      //     user: process.env.MAIL_USER,
+      //     pass: process.env.MAIL_PASSWORD,
+      //   },
+      // });
+      // try {
+      //   await transporter.sendMail({
+      //     from: process.env.MAIL_USER,
+      //     to: reqParam.email,
+      //     subject: "RESET PASSWORD",
+      //     html: `${resetPasswordUrl}`,
+      //   });
+      // } catch (error) {
+      //   errorResponseWithoutData(res, error);
+      // }
+
+      return responseSuccessWithMessage(
+        res,
+        { resetPasswordUrl, token },
+        RESET_LINK_SET_SUCCESSFULLY,
+        META_CODE.SUCCESS
+      );
     }
   } else {
-    errorResponseData(res, MAIL_NOT_REGISTERED, 409);
+    return errorResponseWithoutData(
+      res,
+      MAIL_NOT_REGISTERED,
+      META_CODE.FAIL,
+      STATUS_CODE.CONFLICT
+    );
   }
 };
 
@@ -179,33 +211,52 @@ const resetPassword = async (req, res) => {
 
   passwordValidation(reqParam, res, async (validate) => {
     if (validate) {
-      const userDetail = await user.findOne({
+      const userDetail = await User.findOne({
         where: {
           Token: token,
         },
       });
 
       if (userDetail && userDetail.token_expire < new Date()) {
-        return errorResponseWithoutData(res, TOKEN_EXPIRED, 401);
+        return errorResponseWithoutData(
+          res,
+          TOKEN_EXPIRED,
+          META_CODE.FAIL,
+          STATUS_CODE.UNAUTHORIZED
+        );
       } else {
         if (userDetail) {
           bcrypt.hash(reqParam.password, 10, async (err, hash) => {
             if (err) {
-              return errorResponseWithoutData(res, err);
+              return errorResponseWithoutData(res, err, META_CODE.FAIL);
             } else {
-              const setData = await user.update(
+              const setData = await User.update(
                 { password: hash, Token: null, token_expire: null },
                 { where: { Token: token } }
               );
               if (!setData) {
-                errorResponseData(res, INCORRECT_TOKEN, 498);
+                return errorResponseWithoutData(
+                  res,
+                  INCORRECT_TOKEN,
+                  META_CODE.FAIL,
+                  STATUS_CODE.INVALID_TOKEN
+                );
               } else {
-                successResponseWithoutData(res, PASSWORD_UPDATED);
+                return successResponseWithoutData(
+                  res,
+                  PASSWORD_UPDATED,
+                  META_CODE.SUCCESS
+                );
               }
             }
           });
         } else {
-          errorResponseData(res, INCORRECT_TOKEN, 498);
+          return errorResponseWithoutData(
+            res,
+            INCORRECT_TOKEN,
+            META_CODE.FAIL,
+            STATUS_CODE.INVALID_TOKEN
+          );
         }
       }
     }

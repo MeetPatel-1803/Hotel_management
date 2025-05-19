@@ -9,4 +9,12 @@ module.exports = {
   EMAIL_ALREADY_TAKEN: "Email is already taken",
   UNAUTHORIZED_USER: "Unauthorized - User not found",
   USER_REGISTERED: "User Registered Successfully",
+  INCORRECT_PASSWORD: "Incorrect password",
+  LOGIN_SUCCESSFUL: "LogIn Successfully",
+  INCORRECT_MAIL: "Incorrect Email",
+  RESET_LINK_SET_SUCCESSFULLY: "Reset link set successfully.",
+  MAIL_NOT_REGISTERED: "Email is not registered with us",
+  TOKEN_EXPIRED: "Your reset password token is expired, please try again",
+  INCORRECT_TOKEN: "Incorrect Token",
+  PASSWORD_UPDATED: "password update successfully",
 };

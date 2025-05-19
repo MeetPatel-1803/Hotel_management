@@ -25,10 +25,12 @@ const {
   META_CODE,
   STATUS_CODE,
   PAGINATION,
-  ROOM_TYPES,
   ROOM_STATUS,
 } = require("../utils/constant.js");
 const { Op } = require("sequelize");
+const { config } = require("dotenv");
+
+config();
 
 const createRoom = async (req, res) => {
   const transaction = await sequelize.transaction();
