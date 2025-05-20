@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database.js");
 const user = require("./user.js");
-const room = require("./room.js");
+// const room = require("./room.js");
 
 const bookingSchema = sequelize.define("booking", {
   id: {
@@ -10,13 +10,13 @@ const bookingSchema = sequelize.define("booking", {
     autoIncrement: true,
     allowNull: false,
   },
-  room_id: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: room,
-      key: "id",
-    },
-  },
+  // room_id: {
+  //   type: DataTypes.INTEGER,
+  //   references: {
+  //     model: room,
+  //     key: "id",
+  //   },
+  // },
   user_id: {
     type: DataTypes.INTEGER,
     references: {
@@ -32,20 +32,34 @@ const bookingSchema = sequelize.define("booking", {
     type: DataTypes.DATE,
     allowNull: false,
   },
+  booking_date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
   total_price: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  status: {
-    type: DataTypes.STRING,
+  total_rooms_booked: {
+    type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: "pending",
+    defaultValue: 0,
   },
-  created_at: {
+  total_guests: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  // status: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  //   defaultValue: "pending",
+  // },
+  createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
   },
-  updated_at: {
+  updatedAt: {
     type: DataTypes.DATE,
     allowNull: false,
   },
