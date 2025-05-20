@@ -26,6 +26,7 @@ const {
   loginValidation,
   passwordValidation,
 } = require("../validations/authValidations");
+const bcrypt = require("bcrypt");
 const { config } = require("dotenv");
 
 config();
@@ -34,7 +35,7 @@ const register = async (req, res) => {
   const reqParam = req.body;
   registrationValidation(reqParam, res, async (validate) => {
     if (validate) {
-      const userDetail = await user.findOne({
+      const userDetail = await User.findOne({
         where: {
           email: reqParam.email,
         },
@@ -49,7 +50,8 @@ const register = async (req, res) => {
               STATUS_CODE.INTERNAL_SERVER_ERROR
             );
           } else {
-            const userData = await user.create({
+            const userData = await User.create({
+              name: reqParam.name,
               email: reqParam.email,
               password: hash,
               phone_no: reqParam.phone_no,
@@ -151,8 +153,13 @@ const forgotPassword = async (req, res) => {
       d.getMilliseconds()
     );
 
+    const user = await User.findOne({
+      where: {
+        email: reqParam.email,
+      },
+    });
     const setToken = await User.update(
-      { Token: token, token_expire: tokenExpire },
+      { token, token_expire: tokenExpire },
       { where: { email: reqParam.email } }
     );
 
@@ -167,26 +174,6 @@ const forgotPassword = async (req, res) => {
       const resetPasswordUrl = `http://${process.env.FRONTEND_URL}/reset-password?tokenId=${token}`;
 
       sendResetEmail(reqParam.email, resetPasswordUrl);
-
-      // const transporter = nodemailer.createTransport({
-      //   host: process.env.HOST_SERVICE,
-      //   port: process.env.SERVICE_PORT,
-      //   secure: false,
-      //   auth: {
-      //     user: process.env.MAIL_USER,
-      //     pass: process.env.MAIL_PASSWORD,
-      //   },
-      // });
-      // try {
-      //   await transporter.sendMail({
-      //     from: process.env.MAIL_USER,
-      //     to: reqParam.email,
-      //     subject: "RESET PASSWORD",
-      //     html: `${resetPasswordUrl}`,
-      //   });
-      // } catch (error) {
-      //   errorResponseWithoutData(res, error);
-      // }
 
       return responseSuccessWithMessage(
         res,
@@ -213,7 +200,7 @@ const resetPassword = async (req, res) => {
     if (validate) {
       const userDetail = await User.findOne({
         where: {
-          Token: token,
+          token: token,
         },
       });
 
@@ -231,8 +218,8 @@ const resetPassword = async (req, res) => {
               return errorResponseWithoutData(res, err, META_CODE.FAIL);
             } else {
               const setData = await User.update(
-                { password: hash, Token: null, token_expire: null },
-                { where: { Token: token } }
+                { password: hash, token: null, token_expire: null },
+                { where: { token: token } }
               );
               if (!setData) {
                 return errorResponseWithoutData(

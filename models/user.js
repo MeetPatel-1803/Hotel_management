@@ -31,11 +31,21 @@ const userSchema = sequelize.define("user", {
     allowNull: false,
     defaultValue: USER_ROLE.USER,
   },
-  created_at: {
+  token: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
+  token_expire: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+  },
+  createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
   },
-  updated_at: {
+  updatedAt: {
     type: DataTypes.DATE,
     allowNull: false,
   },
