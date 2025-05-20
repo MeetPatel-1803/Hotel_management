@@ -17,4 +17,5 @@ module.exports = {
   TOKEN_EXPIRED: "Your reset password token is expired, please try again",
   INCORRECT_TOKEN: "Incorrect Token",
   PASSWORD_UPDATED: "password update successfully",
+  TOKEN_NOT_FOUND: "Token not found",
 };

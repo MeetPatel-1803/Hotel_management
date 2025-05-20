@@ -3,6 +3,7 @@ const { errorResponseData } = require("../utils/response");
 
 const registrationValidation = (req, res, callback) => {
   const schema = Joi.object({
+    name: Joi.string().trim(true).required(true),
     email: Joi.string()
       .email()
       .trim(true)
@@ -15,7 +16,7 @@ const registrationValidation = (req, res, callback) => {
       .required()
       .pattern(/(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}/),
     phone_no: Joi.string()
-      .min(3)
+      // .min(3)
       .max(12)
       .required()
       .pattern(/\s*[0-9]{10,11}/),
