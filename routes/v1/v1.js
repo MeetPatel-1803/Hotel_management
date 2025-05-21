@@ -6,6 +6,7 @@ const {
   forgotPassword,
   resetPassword,
 } = require("../../controllers/authController.js");
+const { bookRoom } = require("../../controllers/bookingController.js");
 const {
   createRoom,
   getRooms,
@@ -25,5 +26,7 @@ router.post("/room", createRoom);
 router.put("/room", updateRoom);
 router.delete("/room", deleteRoom);
 router.get("/room", getRooms);
+
+router.post("/book-room", bookRoom);
 
 module.exports = router;

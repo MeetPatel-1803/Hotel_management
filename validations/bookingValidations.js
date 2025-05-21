@@ -1,4 +1,6 @@
 const Joi = require("joi");
+const { ROOM_TYPES } = require("../utils/constant");
+const { errorResponseData } = require("../utils/response");
 
 const bookRoomValidation = (req, res, callback) => {
   const schema = Joi.object({
@@ -11,7 +13,8 @@ const bookRoomValidation = (req, res, callback) => {
           type: Joi.string()
             .valid(...Object.values(ROOM_TYPES))
             .required(),
-          roomId: Joi.number().required(),
+          // roomId: Joi.number().required(),
+          noOfRooms: Joi.number().required(),
         })
       )
       .custom((rooms, helpers) => {
@@ -20,7 +23,7 @@ const bookRoomValidation = (req, res, callback) => {
           return acc;
         }, 0);
 
-        if (roomCounts >= 5) {
+        if (roomCounts > 5) {
           return helpers.error("any.invalid");
         }
 
@@ -29,6 +32,7 @@ const bookRoomValidation = (req, res, callback) => {
   });
   const { error } = schema.validate(req);
   if (error) {
+    console.log(error);
     return errorResponseData(res, error.message, 401);
   } else {
     return callback(true);
