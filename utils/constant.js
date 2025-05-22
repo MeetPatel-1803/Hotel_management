@@ -3,7 +3,7 @@ module.exports = {
     SINGLE: "single",
     DOUBLE: "double",
     DELUX: "delux",
-    SUPER_DELUX: "superDelux",
+    SUPER_DELUX: "superdelux",
   },
   ROOM_STATUS: {
     AVAILABLE: "available",
