@@ -129,7 +129,7 @@ const login = async (req, res) => {
  * @returns
  */
 const forgotPassword = async (req, res) => {
-  const reqParams = req.body;
+  // const reqParams = req.body;
 
   const userDetail = await user.findOne({
     where: {
